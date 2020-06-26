@@ -15,6 +15,15 @@ func (u *User) Insert(d DataLayer) error {
 	return nil
 }
 
+// UpsertUser retreives or registers user from db
+func (u *User) UpsertUser(d DataLayer) (*User, error) {
+	_, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
+}
+
 // GetUsers fetches all users for tenant
 func (db *MongoDatabase) GetUsers(t Tenant) ([]User, error) {
 	var users []User

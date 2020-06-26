@@ -1,7 +1,8 @@
-TODO: Build CRUD:
-  FLAGS
-  Segments - Cohorts (the group that gets toggle on or sees a specific feature)
-  Variations
-  Users
+
 TODO: Build evaluation layer
-TODO: 
+  1. Create Flow of user request, CRUD for user
+  2. 
+TODO: Build Auth
+TODO: Add NATS
+TODO: Add events
+TODO: Use Nats for Stripe, Statistics for flags/events

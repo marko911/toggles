@@ -38,7 +38,8 @@ func (d MongoDatabase) C(name string) Collection {
 // (currently MongoDatabase).
 type DataLayer interface {
 	C(name string) Collection
-	GetFlags() ([]Flag, error)
+	GetFlags(t Tenant) ([]Flag, error)
+	GetSegments(t Tenant) ([]Segment, error)
 }
 
 // Session is an interface to access to the Session struct.

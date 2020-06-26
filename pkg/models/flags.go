@@ -16,10 +16,10 @@ func (flag *Flag) Insert(d DataLayer) error {
 }
 
 // GetFlags returns all flags.
-func (db *MongoDatabase) GetFlags() ([]Flag, error) {
+func (db *MongoDatabase) GetFlags(t Tenant) ([]Flag, error) {
 	var flags []Flag
 
-	err := db.C("flags").Find(bson.M{}).All(&flags)
+	err := db.C("flags").Find(bson.M{"tenant": t.ID}).All(&flags)
 	if err != nil {
 		return flags, err
 	}

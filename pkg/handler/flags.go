@@ -6,7 +6,6 @@ import (
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // FlagsHandler routes flag requests
@@ -29,13 +28,13 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 // HandleFlagsGet returns all flags from db
 func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 	s := models.SessionFromContext(r.Context()).Copy()
-	defer func() {
-		s.Close()
-	}()
+	tenant := models.TenantFromContext(r.Context())
+
+	defer s.Close()
 
 	d := s.DB(os.Getenv("DB_NAME"))
 
-	c, err := d.GetFlags()
+	c, err := d.GetFlags(tenant)
 	if err != nil {
 		logrus.Error("Getting flag failed: ", err)
 		respondHTTPErr(w, r, http.StatusBadRequest)
@@ -49,17 +48,18 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 // HandleFlagsPost adds a new flag to database
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	s := models.SessionFromContext(r.Context()).Copy()
+	tenant := models.TenantFromContext(r.Context())
+
 	defer s.Close()
 
 	d := s.DB(os.Getenv("DB_NAME"))
 
-	flag := &models.Flag{}
+	flag := &models.Flag{Tenant: tenant.ID}
 
 	if err := decodeBody(r, flag); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to read flag from request", err)
+		respondErr(w, r, http.StatusBadRequest, "failed to read flag from request ", err)
 		return
 	}
-	flag.ID = bson.NewObjectId()
 
 	if err := flag.Insert(d); err != nil {
 		respondErr(w, r, http.StatusInternalServerError, "failed to insert flag", err)
