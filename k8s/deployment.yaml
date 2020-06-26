@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toggles
+  labels:
+    app: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: toggle-server
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ENV
+              value: prod
+            - name: PORT
+              value: :8080
+            - name: DB_ADDRESS
+              value: "$(MONGO_ADDRESSES)"
+            - name: DB_NAME
+              value: toggles
+            - name: MONGO_USER
+              value: "backend_api_user"
+            - name: MONGO_PASS
+              value: "$(MONGO_PASS)"
+            - name: AUTH0_DOMAIN
+              value: "dev-marko911.auth0.com"
+            - name: AUTH0_AUDIENCE
+              value: "https://feature-toggles/api"
+            - name: SERVER_ALLOWED_HOSTS
+              value: "$(ALLOWED_HOSTS_URL)"
+            - name: NATS_SERVER_URL
+              value: nats://nats:4222, nats://nats-1:4222, nats://nats-2:4222
+            - name: BUGSNAG_API_KEY
+              value: "$(BUGSNAG_KEY)"
+          image: gcr.io/featflags-369-superseed/toggles

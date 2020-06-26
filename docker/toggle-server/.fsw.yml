@@ -4,6 +4,7 @@ triggers:
     pattens:
       - "**/*.go"
       - "!vendor/**/*"
+      - "!cmd/**/*"
 
     # also support '!**/test_*.go'
     env:

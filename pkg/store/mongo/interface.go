@@ -1,15 +1,18 @@
-package models
+package mongo
 
 import (
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
+	mgo "github.com/globalsign/mgo"
 )
 
-// MongoCollection wraps a mgo.Collection to embed methods in models.
-type MongoCollection struct {
+// WrapCollection wraps a mgo.Collection to embed methods in models.
+type WrapCollection struct {
 	*mgo.Collection
 }
+
+// CTXKey is the key used to embed mongo ref to context
+const CTXKey string = "mongo"
 
 // Collection is an interface to access to the collection struct.
 type Collection interface {
@@ -19,26 +22,26 @@ type Collection interface {
 	Insert(docs ...interface{}) error
 	Remove(selector interface{}) error
 	Update(selector interface{}, update interface{}) error
+	UpdateAll(selector interface{}, update interface{}) (*mgo.ChangeInfo, error)
+	Pipe(pipeline interface{}) *mgo.Pipe
 	Upsert(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error)
 	EnsureIndex(index mgo.Index) error
 	RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err error)
 }
 
-// MongoDatabase wraps a mgo.Database to embed methods in models.
-type MongoDatabase struct {
+// Database wraps a mgo.Database to embed methods in models.
+type Database struct {
 	*mgo.Database
 }
 
 // C shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
-func (d MongoDatabase) C(name string) Collection {
-	return &MongoCollection{Collection: d.Database.C(name)}
+func (d Database) C(name string) Collection {
+	return &WrapCollection{Collection: d.Database.C(name)}
 }
 
 // DataLayer is an interface to access to the database struct
-// (currently MongoDatabase).
 type DataLayer interface {
 	C(name string) Collection
-	GetFlags() ([]Flag, error)
 }
 
 // Session is an interface to access to the Session struct.
@@ -51,30 +54,18 @@ type Session interface {
 	Copy() Session
 }
 
-// MongoSession is currently a Mongo session.
-type MongoSession struct {
+// Store is a Mongo session.
+type Store struct {
 	*mgo.Session
+	DBName string
 }
 
 // DB shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
-func (s MongoSession) DB(name string) DataLayer {
-	return &MongoDatabase{Database: s.Session.DB(name)}
+func (s Store) DB(name string) DataLayer {
+	return &Database{Database: s.Session.DB(name)}
 }
 
 // Copy mocks mgo.Session.Copy()
-func (s MongoSession) Copy() Session {
-	return MongoSession{s.Session.Copy()}
-}
-
-// NewSession returns a new Mongo Session.
-func NewSession(info *mgo.DialInfo) (Session, error) {
-	mgoSession, err := mgo.DialWithInfo(info)
-	if err != nil {
-		return nil, err
-	}
-	session := MongoSession{mgoSession}
-	session.SetSafe(&mgo.Safe{})
-	session.SetSyncTimeout(3 * time.Second)
-	session.SetSocketTimeout(3 * time.Second)
-	return session, nil
+func (s Store) Copy() Session {
+	return Store{s.Session.Copy(), s.DBName}
 }

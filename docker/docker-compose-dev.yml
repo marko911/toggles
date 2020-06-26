@@ -1,0 +1,57 @@
+version: "3.5"
+services:
+  toggle-server:
+    container_name: toggle-server
+    build:
+      context: ./toggle-server
+      dockerfile: Dockerfile-dev
+      args:
+        env: ${ENV}
+    volumes:
+      - ../:/toggle/server
+    ports:
+      - "8080:8080"
+    networks:
+      - nats
+    depends_on: ["nats"]
+    links:
+      - mongo
+    env_file:
+      - ../.env
+
+  mongo:
+    image: mongo
+    restart: always
+    networks:
+      - nats
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: l30m355i
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - nats
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: l30m355i
+
+  nats:
+    image: nats
+    ports:
+      - "8222:8222"
+    command: "--cluster nats://0.0.0.0:6222 -DV --routes=nats://ruser:T0pS3cr3t@nats:6222"
+
+    networks: ["nats"]
+  nats-1:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 -DV --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats"]
+
+networks:
+  nats:
+    name: nats

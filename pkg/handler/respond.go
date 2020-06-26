@@ -3,12 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"toggle/server/pkg/errors"
 )
 
 func decodeBody(r *http.Request, v interface{}) error {
 	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(v)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if len(body) == 0 {
+		return errors.ErrJSONPayloadEmpty
+	}
+	err = json.Unmarshal(body, &v)
+	return err
 }
 
 func encodeBody(w http.ResponseWriter, r *http.Request, v interface{}) error {
@@ -24,7 +32,7 @@ func respond(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func respondErr(w http.ResponseWriter, r *http.Request,
+func RespondErr(w http.ResponseWriter, r *http.Request,
 	status int, args ...interface{},
 ) {
 	respond(w, r, status, map[string]interface{}{
@@ -37,5 +45,5 @@ func respondErr(w http.ResponseWriter, r *http.Request,
 func respondHTTPErr(w http.ResponseWriter, r *http.Request,
 	status int,
 ) {
-	respondErr(w, r, status, http.StatusText(status))
+	RespondErr(w, r, status, http.StatusText(status))
 }
