@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"toggle/server/pkg/models"
@@ -15,27 +16,35 @@ type Evaluation struct {
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
-	e, err := parseEvaluation(w, r)
+	e, err := evaluationFromRequest(w, r)
 	if err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to parse evaluation", err)
 		return
 	}
-	fmt.Println("EVAL!", e.User, e.FlagKey)
+	// TODO: start here
+
+	fmt.Println("flagkjey! ", e.FlagKey)
 	respond(w, r, http.StatusCreated, "Eval created successfully")
 
 }
 
-func parseEvaluation(w http.ResponseWriter, r *http.Request) (*Evaluation, error) {
+func evaluationFromRequest(w http.ResponseWriter, r *http.Request) (*Evaluation, error) {
 	var e Evaluation
 
 	if err := decodeBody(r, &e); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "failed to read user from request", err)
 		return nil, err
 	}
-	return &e, nil
-	//Parse user from request
-	// u, ok := e["user"].(*models.User)
 
-	// u.Tenant = tenant.ID
+	if e.FlagKey == "" {
+		respondErr(w, r, http.StatusBadRequest, "Must provide flag key")
+		return nil, errors.New("")
+	}
+
+	if e.User.Key == "" {
+		respondErr(w, r, http.StatusBadRequest, "Unique user key is missing")
+		return nil, errors.New("")
+	}
+
+	return &e, nil
 
 }
