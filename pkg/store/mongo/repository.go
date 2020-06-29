@@ -11,52 +11,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// MongoCollection wraps a mgo.Collection to embed methods in models.
-type MongoCollection struct {
-	*mgo.Collection
-}
-
-// Collection is an interface to access to the collection struct.
-type Collection interface {
-	Find(query interface{}) *mgo.Query
-	Count() (n int, err error)
-	FindId(id interface{}) *mgo.Query
-	Insert(docs ...interface{}) error
-	Remove(selector interface{}) error
-	Update(selector interface{}, update interface{}) error
-	Upsert(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error)
-	EnsureIndex(index mgo.Index) error
-	RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err error)
-}
-
-// MongoDatabase wraps a mgo.Database to embed methods in models.
-type MongoDatabase struct {
-	*mgo.Database
-}
-
-// C shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
-func (d MongoDatabase) C(name string) Collection {
-	return &MongoCollection{Collection: d.Database.C(name)}
-}
-
-// DataLayer is an interface to access to the database struct
-// (currently MongoDatabase).
-type DataLayer interface {
-	C(name string) Collection
-	// GetFlags(t Tenant) ([]Flag, error)
-	// GetSegments(t Tenant) ([]Segment, error)
-}
-
-// Session is an interface to access to the Session struct.
-type Session interface {
-	DB(name string) DataLayer
-	SetSafe(safe *mgo.Safe)
-	SetSyncTimeout(d time.Duration)
-	SetSocketTimeout(d time.Duration)
-	Close()
-	Copy() Store
-}
-
 // Store is a Mongo session.
 type Store struct {
 	*mgo.Session
@@ -64,7 +18,7 @@ type Store struct {
 
 // DB shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
 func (s Store) DB(name string) DataLayer {
-	return &MongoDatabase{Database: s.Session.DB(name)}
+	return &Database{Database: s.Session.DB(name)}
 }
 
 // Copy mocks mgo.Session.Copy()
