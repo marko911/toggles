@@ -46,7 +46,7 @@ func NewServer(c *cli.Context) *Server {
 		}
 	}()
 
-	s, err := mongo.NewStore(c)
+	s, err := mongo.NewMongoStore(c)
 	create := create.NewService(s)
 
 	r := handler.Router{Create: create}
@@ -66,6 +66,7 @@ func (s Server) Start(c *cli.Context) {
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: s.router.Handler(c),
