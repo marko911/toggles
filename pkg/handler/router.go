@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"toggle/server/pkg/create"
 	"toggle/server/pkg/middleware"
 	"toggle/server/pkg/models"
 
@@ -14,7 +15,7 @@ var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7e
 
 // Router contains all endpoints and provides a handler
 type Router struct {
-	Db models.Session
+	Create create.Service
 }
 
 // Handler returns an http.Handler encompassing all endpoint routes
@@ -23,10 +24,10 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 
 	router.HandleFunc("/flags", FlagsHandler)
 	router.HandleFunc("/segments", SegmentsHandler)
-	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
+	// router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
 
 	router.Use(
-		middleware.Store(ctx, r.Db),
+		middleware.Store(ctx, r.Create),
 		middleware.Tenant(ctx, tempTenant),
 	)
 

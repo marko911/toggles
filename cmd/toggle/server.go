@@ -8,19 +8,18 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"toggle/server/pkg/create"
 	"toggle/server/pkg/handler"
-	"toggle/server/pkg/models"
+	"toggle/server/pkg/store/mongo"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"gopkg.in/mgo.v2"
 )
 
 // Server for toggle API
 type Server struct {
-	port   string
 	router handler.Router
-	db     models.Session
+	store  *mongo.Store
 }
 
 var fatalErr error
@@ -31,6 +30,14 @@ func fatal(e error) {
 	fatalErr = e
 }
 
+// StoreType defines available storage types
+type StoreType int
+
+const (
+	// Mongo will use mongo as the store method
+	Mongo StoreType = iota
+)
+
 // NewServer builds an http.Server with a router and port
 func NewServer(c *cli.Context) *Server {
 	defer func() {
@@ -39,43 +46,41 @@ func NewServer(c *cli.Context) *Server {
 		}
 	}()
 
-	port := c.String("server-address")
-	db, err := models.NewSession(&mgo.DialInfo{
-		Addrs:    []string{c.String("database-address")},
-		Username: c.String("mongo-username"),
-		Password: c.String("mongo-password"),
-	})
+	s, err := mongo.NewStore(c)
+	create := create.NewService(s)
 
-	r := handler.Router{Db: db}
+	r := handler.Router{Create: create}
 	if err != nil {
 		logrus.Fatal(err)
 		return nil
 	}
 
-	return &Server{port, r, db}
+	return &Server{r, s}
 }
 
 //Start the server
 func (s Server) Start(c *cli.Context) {
 	logrus.SetLevel(logrus.InfoLevel)
 
+	addr := c.String("server-address")
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	srv := &http.Server{
-		Addr:    s.port,
+		Addr:    addr,
 		Handler: s.router.Handler(c),
 	}
 	go func() {
 		logrus.Fatal(srv.ListenAndServe())
 	}()
 
-	logrus.Printf("Server Started at to http://localhost%s/", s.port)
+	logrus.Printf("Server Started at to http://localhost%s/", addr)
 
 	// Wait for the interrupt signal.
 	<-interrupt
 
 	logrus.Println("Server is shutting down...")
-	s.db.Close()
+	s.store.Close()
 	srv.Shutdown(context.Background())
 
 	logrus.Println("Server is shut down")
