@@ -4,14 +4,17 @@ import (
 	"net/http"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/models"
+	"toggle/server/pkg/read"
+
+	"github.com/sirupsen/logrus"
 )
 
 // FlagsHandler routes flag requests
 func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	// case "GET":
-	// 	HandleFlagsGet(w, r)
-	// 	return
+	case "GET":
+		HandleFlagsGet(w, r)
+		return
 	case "POST":
 		HandleFlagsPost(w, r)
 		return
@@ -24,24 +27,20 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleFlagsGet returns all flags from db
-// func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
-// 	s := models.SessionFromContext(r.Context()).Copy()
-// 	tenant := models.TenantFromContext(r.Context())
+func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
+	s := read.FromContext(r.Context())
+	tenant := models.TenantFromContext(r.Context())
 
-// 	defer s.Close()
+	c, err := s.GetFlags(tenant)
+	if err != nil {
+		logrus.Error("Getting flag failed: ", err)
+		respondHTTPErr(w, r, http.StatusBadRequest)
+		return
+	}
+	encodeBody(w, r, &c)
+	respond(w, r, http.StatusOK, c)
 
-// 	d := s.DB(os.Getenv("DB_NAME"))
-
-// 	c, err := d.GetFlags(tenant)
-// 	if err != nil {
-// 		logrus.Error("Getting flag failed: ", err)
-// 		respondHTTPErr(w, r, http.StatusBadRequest)
-// 		return
-// 	}
-// 	encodeBody(w, r, &c)
-// 	respond(w, r, http.StatusOK, c)
-
-// }
+}
 
 // HandleFlagsPost adds a new flag to database
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {

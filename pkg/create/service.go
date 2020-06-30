@@ -25,16 +25,19 @@ func NewService(r Repository) Service {
 	return &service{r}
 }
 
+// CreateFlag creates a new flag in repository
 func (s *service) CreateFlag(f *models.Flag) error {
 	err := s.r.InsertFlag(f)
 	return err
 }
 
+// CreateSegment creates a new segment in repository
 func (s *service) CreateSegment(seg *models.Segment) error {
 	err := s.r.InsertSegment(seg)
 	return err
 }
 
+// CreateUser creates a new user in repository
 func (s *service) CreateUser(u *models.User) error {
 	err := s.r.InsertUser(u)
 	return err

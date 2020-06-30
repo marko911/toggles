@@ -90,3 +90,17 @@ func (s *Store) UpsertUser(u *models.User) (*models.User, error) {
 	}
 	return u, nil
 }
+
+func (s *Store) GetFlags(t models.Tenant) ([]models.Flag,error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(os.Getenv("DB_NAME"))
+
+	_, err := d.C("flags").Upsert(bson.M{"key": u.Key}, u)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
+}
+}
