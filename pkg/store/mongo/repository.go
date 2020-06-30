@@ -91,16 +91,50 @@ func (s *Store) UpsertUser(u *models.User) (*models.User, error) {
 	return u, nil
 }
 
-func (s *Store) GetFlags(t models.Tenant) ([]models.Flag,error) {
+// GetFlags fetches flags from db
+func (s *Store) GetFlags(t models.Tenant) ([]models.Flag, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
 	d := sess.DB(os.Getenv("DB_NAME"))
 
-	_, err := d.C("flags").Upsert(bson.M{"key": u.Key}, u)
+	var flags []models.Flag
+
+	err := d.C("flags").Find(bson.M{"tenant": t.ID}).All(&flags)
+
 	if err != nil {
-		return u, err
+		return flags, err
 	}
-	return u, nil
+	return flags, nil
+
 }
+
+// GetSegments fetches segments from db
+func (s *Store) GetSegments(t models.Tenant) ([]models.Segment, error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(os.Getenv("DB_NAME"))
+	var segments []models.Segment
+	err := d.C("segments").Find(bson.M{"tenant": t.ID}).All(&segments)
+
+	if err != nil {
+		return segments, err
+	}
+	return segments, nil
+}
+
+// GetUsers fetches segments from db
+func (s *Store) GetUsers(t models.Tenant) ([]models.User, error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(os.Getenv("DB_NAME"))
+	var users []models.User
+	err := d.C("users").Find(bson.M{"tenant": t.ID}).All(&users)
+
+	if err != nil {
+		return users, err
+	}
+	return users, nil
 }

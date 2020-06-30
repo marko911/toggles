@@ -33,7 +33,7 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 
 	c, err := s.GetFlags(tenant)
 	if err != nil {
-		logrus.Error("Getting flag failed: ", err)
+		logrus.Error("Getting flags failed: ", err)
 		respondHTTPErr(w, r, http.StatusBadRequest)
 		return
 	}
