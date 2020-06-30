@@ -2,18 +2,6 @@ package create
 
 import "toggle/server/pkg/models"
 
-type Payload []models.Flag
-
-type Event int
-
-const (
-	Done Event = iota
-
-	FlagKeyExists
-
-	Failed
-)
-
 // Service provides create operations
 type Service interface {
 	CreateFlag(*models.Flag) error
@@ -21,6 +9,7 @@ type Service interface {
 	CreateUser(*models.User) error
 }
 
+// Repository handles persistance of entity data
 type Repository interface {
 	InsertFlag(*models.Flag) error
 	InsertSegment(*models.Segment) error
@@ -31,6 +20,7 @@ type service struct {
 	r Repository // outbound port
 }
 
+// NewService returns a creation service
 func NewService(r Repository) Service {
 	return &service{r}
 }
