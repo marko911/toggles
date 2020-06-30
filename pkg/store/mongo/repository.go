@@ -11,21 +11,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// Store is a Mongo session.
-type Store struct {
-	*mgo.Session
-}
-
-// DB shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
-func (s Store) DB(name string) DataLayer {
-	return &Database{Database: s.Session.DB(name)}
-}
-
-// Copy mocks mgo.Session.Copy()
-func (s Store) Copy() Store {
-	return Store{s.Session.Copy()}
-}
-
 // NewMongoStore returns a new Mongo Session.
 func NewMongoStore(c *cli.Context) (*Store, error) {
 	mgoSession, err := mgo.DialWithInfo(&mgo.DialInfo{

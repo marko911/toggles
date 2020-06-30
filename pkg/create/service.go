@@ -28,7 +28,7 @@ type Repository interface {
 }
 
 type service struct {
-	r Repository
+	r Repository // outbound port
 }
 
 func NewService(r Repository) Service {
