@@ -119,6 +119,7 @@ func (s *Store) GetSegments(t models.Tenant) ([]models.Segment, error) {
 	err := d.C("segments").Find(bson.M{"tenant": t.ID}).All(&segments)
 
 	if err != nil {
+		logrus.Error("Cant find segments with this tenant", err)
 		return segments, err
 	}
 	return segments, nil
