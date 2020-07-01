@@ -26,7 +26,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 
 	router.HandleFunc("/flags", FlagsHandler)
 	router.HandleFunc("/segments", SegmentsHandler)
-	// router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
+	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
 
 	router.Use(
 		middleware.Store(ctx, r.Create, r.Read),

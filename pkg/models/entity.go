@@ -45,6 +45,13 @@ type User struct {
 	Tenant     bson.ObjectId          `json:"tenant,omitempty" bson:"tenant"`
 }
 
+//Attribute represents a custom user attribute ie. a user group, age, gender
+type Attribute struct {
+	ID     bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Name   string        `json:"name" bson:"name"`
+	Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant"`
+}
+
 // Target is a specific user constraint
 type Target struct {
 	Rule       Rule         `json:"rule" bson:"rule"`

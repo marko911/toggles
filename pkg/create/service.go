@@ -7,6 +7,7 @@ type Service interface {
 	CreateFlag(*models.Flag) error
 	CreateSegment(*models.Segment) error
 	CreateUser(*models.User) error
+	CreateAttributes(*models.User) error
 }
 
 // Repository handles persistance of entity data
@@ -14,6 +15,7 @@ type Repository interface {
 	InsertFlag(*models.Flag) error
 	InsertSegment(*models.Segment) error
 	InsertUser(*models.User) error
+	InsertAttributes([]models.Attribute) error
 }
 
 type service struct {
@@ -40,5 +42,19 @@ func (s *service) CreateSegment(seg *models.Segment) error {
 // CreateUser creates a new user in repository
 func (s *service) CreateUser(u *models.User) error {
 	err := s.r.InsertUser(u)
+	return err
+}
+
+func (s *service) CreateAttributes(u *models.User) error {
+	var attrs []models.Attribute
+	for attribute := range u.Attributes {
+		a := models.Attribute{
+			Name:   attribute,
+			Tenant: u.Tenant,
+		}
+		attrs = append(attrs, a)
+	}
+
+	err := s.r.InsertAttributes(attrs)
 	return err
 }

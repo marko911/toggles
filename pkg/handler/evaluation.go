@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"toggle/server/pkg/create"
 	"toggle/server/pkg/models"
 )
 
@@ -16,19 +17,33 @@ type Evaluation struct {
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
-	e, err := evaluationFromRequest(w, r)
+	eval, err := handleEvalRequest(w, r)
 	if err != nil {
 		return
 	}
-	// TODO: start here
 
-	fmt.Println("flagkjey! ", e.FlagKey)
+	createService := create.FromContext(r.Context())
+
+	// Add user to db if not existing
+	if err = createService.CreateUser(&eval.User); err != nil {
+		respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
+	}
+
+	// Add any custom user attributes to db
+	if err = createService.CreateAttributes(&eval.User); err != nil {
+		respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
+	}
+
+	fmt.Println("flagkjey! ", eval.FlagKey, eval.User)
 	respond(w, r, http.StatusCreated, "Eval created successfully")
 
 }
 
-func evaluationFromRequest(w http.ResponseWriter, r *http.Request) (*Evaluation, error) {
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*Evaluation, error) {
 	var e Evaluation
+
+	tenant := models.TenantFromContext(r.Context())
+	e.User.Tenant = tenant.ID
 
 	if err := decodeBody(r, &e); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "failed to read user from request", err)

@@ -67,7 +67,8 @@ func (s *Store) InsertUser(u *models.User) error {
 	defer sess.Close()
 
 	d := sess.DB(os.Getenv("DB_NAME"))
-	err := d.C("users").Insert(u)
+	// err := d.C("users").Insert(u)
+	_, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 
 	if err != nil {
 		logrus.Warning(err)
@@ -89,6 +90,22 @@ func (s *Store) UpsertUser(u *models.User) (*models.User, error) {
 		return u, err
 	}
 	return u, nil
+}
+
+// InsertAttributes adds custom user attributes to db
+func (s *Store) InsertAttributes(a []models.Attribute) error {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(os.Getenv("DB_NAME"))
+
+	for _, attr := range a {
+		_, err := d.C("attributes").Upsert(bson.M{"name": attr.Name}, attr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // GetFlags fetches flags from db
