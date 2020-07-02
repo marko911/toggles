@@ -126,6 +126,20 @@ func (s *Store) GetFlags(t models.Tenant) ([]models.Flag, error) {
 
 }
 
+// GetFlag retreives a single flag given a key
+func (s *Store) GetFlag(key string) (*models.Flag, error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(os.Getenv("DB_NAME"))
+	var flag models.Flag
+	err := d.C("flags").Find(bson.M{"key": key}).One(&flag)
+	if err != nil {
+		return nil, err
+	}
+	return &flag, nil
+}
+
 // GetSegments fetches segments from db
 func (s *Store) GetSegments(t models.Tenant) ([]models.Segment, error) {
 	sess := s.Copy()

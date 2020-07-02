@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"sync"
 	"toggle/server/pkg/create"
@@ -10,10 +9,6 @@ import (
 )
 
 // Evaluation represents a client request for flag evaluation
-type Evaluation struct {
-	FlagKey string      `json:"flagKey"`
-	User    models.User `json:"user"`
-}
 
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,44 +20,49 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	createService := create.FromContext(r.Context())
 
-	errc := make(chan error, 2)
-
+	errc := make(chan error, 1)
 	var wg sync.WaitGroup
 
+	// Add user to db if not existing
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		// Add user to db if not existing
 		if err = createService.CreateUser(&eval.User); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
 			errc <- err
 		}
 	}()
 
+	// Add any custom user attributes to db
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-
-		// Add any custom user attributes to db
 		if err = createService.CreateAttributes(&eval.User); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
-			fmt.Println("SHOULD ERR")
 			errc <- err
 		}
 	}()
 
 	wg.Wait()
+
 	select {
-	case <-errc:
-		return
+	case err := <-errc:
+		if err != nil {
+			return
+		}
+	default:
+		break
 	}
 
+	close(errc)
+
+	//
 	respond(w, r, http.StatusCreated, "Eval created successfully")
 
 }
 
-func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*Evaluation, error) {
-	var e Evaluation
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*models.Evaluation, error) {
+	var e models.Evaluation
 
 	tenant := models.TenantFromContext(r.Context())
 	e.User.Tenant = tenant.ID

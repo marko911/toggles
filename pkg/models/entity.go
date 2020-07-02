@@ -4,14 +4,13 @@ import "gopkg.in/mgo.v2/bson"
 
 // Flag represents a feature flag object
 type Flag struct {
-	ID         bson.ObjectId   `json:"id" bson:"_id,omitempty"`
-	Name       string          `json:"name" bson:"name"`
-	Key        string          `json:"key" bson:"key"`
-	Enabled    bool            `json:"enabled" bson:"enabled"`
-	Variations []Variation     `json:"variations" bson:"variations"`
-	Users      []bson.ObjectId `json:"users,omitempty" bson:"users,omitempty"`
-	Targets    []Target        `json:"targets,omitempty" bson:"targets,omitempty"`
-	Tenant     bson.ObjectId   `json:"tenant" bson:"tenant"`
+	ID         bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Name       string        `json:"name" bson:"name"`
+	Key        string        `json:"key" bson:"key"`
+	Enabled    bool          `json:"enabled" bson:"enabled"`
+	Variations []Variation   `json:"variations" bson:"variations"`
+	Targets    []Target      `json:"targets,omitempty" bson:"targets,omitempty"`
+	Tenant     bson.ObjectId `json:"tenant" bson:"tenant"`
 }
 
 // Rule is a constraint placed on users being evaluated
@@ -33,14 +32,19 @@ type Segment struct {
 
 //Variation represents a toggle option for a flag
 type Variation struct {
-	Name    string `json:"name" bson:"name"`
-	Percent int16  `json:"percent" bson:"percent"`
+	Name    string          `json:"name" bson:"name"`
+	Percent int16           `json:"percent" bson:"percent"`
+	Users   []bson.ObjectId `json:"users,omitempty" bson:"users,omitempty"` // if a variation has specific users targeted
 }
 
 // User represents a client request
 type User struct {
 	ID         bson.ObjectId          `json:"id,omitempty" bson:"_id,omitempty"`
-	Key        string                 `json:"key" bson:"key"`
+	Key        string                 `json:"key,omitempty" bson:"key,omitempty"`
+	Country    string                 `json:"country,omitempty" bson:"country,omitempty"`
+	Email      string                 `json:"email,omitempty" bson:"email,omitempty"`
+	Name       string                 `json:"name,omitempty" bson:"name,omitempty"`
+	IP         string                 `json:"ip,omitempty" bson:"ip,omitempty"`
 	Attributes map[string]interface{} `json:"attributes,omitempty" bson:"attributes,omitempty"`
 	Tenant     bson.ObjectId          `json:"tenant,omitempty" bson:"tenant"`
 }
@@ -54,11 +58,25 @@ type Attribute struct {
 
 // Target is a specific user constraint
 type Target struct {
-	Rule       Rule         `json:"rule" bson:"rule"`
+	Rule       []Rule       `json:"rule" bson:"rule"` // multi rule combo
 	Variations *[]Variation `json:"variations" bson:"variations"`
 }
 
 // Tenant is a user of the system
 type Tenant struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
+}
+
+// Evaluation represents an evaluation request
+type Evaluation struct {
+	FlagKey string `json:"flagKey"`
+	User    User   `json:"user"`
+}
+
+// EvaluationResult determines what variation user is shown, can be simple true or false
+// or a specific variation of flag being evaluated
+type EvaluationResult struct {
+	User      User
+	Variation Variation
+	FlagID    bson.ObjectId `json:"flagId"`
 }
