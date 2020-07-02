@@ -1,6 +1,8 @@
 package create
 
-import "toggle/server/pkg/models"
+import (
+	"toggle/server/pkg/models"
+)
 
 // Service provides create operations
 type Service interface {
@@ -55,6 +57,9 @@ func (s *service) CreateAttributes(u *models.User) error {
 		attrs = append(attrs, a)
 	}
 
-	err := s.r.InsertAttributes(attrs)
-	return err
+	if len(attrs) > 0 {
+		err := s.r.InsertAttributes(attrs)
+		return err
+	}
+	return nil
 }

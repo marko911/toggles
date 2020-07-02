@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/models"
 )
@@ -24,17 +25,38 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	createService := create.FromContext(r.Context())
 
-	// Add user to db if not existing
-	if err = createService.CreateUser(&eval.User); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
+	errc := make(chan error, 2)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// Add user to db if not existing
+		if err = createService.CreateUser(&eval.User); err != nil {
+			respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
+			errc <- err
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		// Add any custom user attributes to db
+		if err = createService.CreateAttributes(&eval.User); err != nil {
+			respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
+			fmt.Println("SHOULD ERR")
+			errc <- err
+		}
+	}()
+
+	wg.Wait()
+	select {
+	case <-errc:
+		return
 	}
 
-	// Add any custom user attributes to db
-	if err = createService.CreateAttributes(&eval.User); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
-	}
-
-	fmt.Println("flagkjey! ", eval.FlagKey, eval.User)
 	respond(w, r, http.StatusCreated, "Eval created successfully")
 
 }
