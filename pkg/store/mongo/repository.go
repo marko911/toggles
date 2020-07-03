@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"fmt"
 	"os"
 	"time"
 	"toggle/server/pkg/models"
@@ -61,20 +62,20 @@ func (s *Store) InsertSegment(seg *models.Segment) error {
 	return nil
 }
 
-//InsertUser saves a segment to mongo
+//InsertUser saves a user to mongo
 func (s *Store) InsertUser(u *models.User) error {
 	sess := s.Copy()
 	defer sess.Close()
 
 	d := sess.DB(os.Getenv("DB_NAME"))
 	// err := d.C("users").Insert(u)
-	_, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
+	info, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 
 	if err != nil {
 		logrus.Warning(err)
 		return err
 	}
-
+	fmt.Println("info", info.UpsertedId)
 	return nil
 }
 

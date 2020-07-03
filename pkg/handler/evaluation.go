@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"toggle/server/pkg/create"
+	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/models"
 )
 
@@ -61,8 +62,8 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*models.Evaluation, error) {
-	var e models.Evaluation
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*evaluate.EvaluationRequest, error) {
+	var e evaluate.EvaluationRequest
 
 	tenant := models.TenantFromContext(r.Context())
 	e.User.Tenant = tenant.ID

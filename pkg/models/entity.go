@@ -32,9 +32,9 @@ type Segment struct {
 
 //Variation represents a toggle option for a flag
 type Variation struct {
-	Name    string          `json:"name" bson:"name"`
-	Percent int16           `json:"percent" bson:"percent"`
-	Users   []bson.ObjectId `json:"users,omitempty" bson:"users,omitempty"` // if a variation has specific users targeted
+	Name     string   `json:"name" bson:"name"`
+	Percent  int16    `json:"percent" bson:"percent"`
+	UserKeys []string `json:"users,omitempty" bson:"users,omitempty"` // if a variation has specific users targeted
 }
 
 // User represents a client request
@@ -67,16 +67,10 @@ type Tenant struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 }
 
-// Evaluation represents an evaluation request
-type Evaluation struct {
-	FlagKey string `json:"flagKey"`
-	User    User   `json:"user"`
-}
-
 // EvaluationResult determines what variation user is shown, can be simple true or false
 // or a specific variation of flag being evaluated
 type EvaluationResult struct {
 	User      User
-	Variation Variation
+	Variation *Variation
 	FlagID    bson.ObjectId `json:"flagId"`
 }
