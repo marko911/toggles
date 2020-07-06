@@ -1,7 +1,7 @@
 
 TODO: Build evaluation layer
-  1. Create Flow of user request, CRUD for user
-  2. 
+  1. create conditions parser to return bool for matching of rules
+  2. create rollout builder, returning variation for matched rules
 TODO: Build Auth
 TODO: Add NATS
 TODO: Add events

@@ -54,6 +54,7 @@ type Session interface {
 // Store is a Mongo session.
 type Store struct {
 	*mgo.Session
+	DBName string
 }
 
 // DB shadows *mgo.DB to returns a DataLayer interface instead of *mgo.Database.
@@ -63,5 +64,5 @@ func (s Store) DB(name string) DataLayer {
 
 // Copy mocks mgo.Session.Copy()
 func (s Store) Copy() Store {
-	return Store{s.Session.Copy()}
+	return Store{s.Session.Copy(), s.DBName}
 }

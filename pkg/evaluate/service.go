@@ -1,6 +1,10 @@
 package evaluate
 
-import "toggle/server/pkg/models"
+import (
+	"toggle/server/pkg/models"
+
+	"github.com/sirupsen/logrus"
+)
 
 // EvaluationRequest represents an a client request on a flag key
 type EvaluationRequest struct {
@@ -8,9 +12,14 @@ type EvaluationRequest struct {
 	User    models.User `json:"user"`
 }
 
+type EvaluationData struct {
+	FlagKey string
+	User    interface{}
+}
+
 // Service runs evaluation operations on client feature flag requests
 type Service interface {
-	Evaluate(e EvaluationRequest) (*models.EvaluationResult, error)
+	Evaluate(e EvaluationData) (*models.EvaluationResult, error)
 }
 
 // Repository holds all persisted data related to flags, users, attributes, segments
@@ -28,7 +37,7 @@ func NewService(r Repository) Service {
 }
 
 // Evaluate processes a client request and returns the variation to show to user
-func (s *service) Evaluate(e EvaluationRequest) (*models.EvaluationResult, error) {
+func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
 	flag, err := s.r.GetFlag(e.FlagKey)
 
 	if err != nil {
@@ -36,24 +45,31 @@ func (s *service) Evaluate(e EvaluationRequest) (*models.EvaluationResult, error
 	}
 
 	if v := e.VariationFromUserTargeting(flag); v != nil {
-		// return variation
-		return &models.EvaluationResult{User: e.User, Variation: v, FlagID: flag.ID}, nil
+		return &models.EvaluationResult{User: e.User.(models.User), Variation: v, FlagID: flag.ID}, nil
 	}
 
-	if v := e.MatchFlagTarget(flag.Targets); v != nil {
+	if v, err := e.MatchFlagTarget(flag.Targets); v != nil {
+		if err != nil {
+			return nil, err
+		}
+		return &models.EvaluationResult{User: e.User.(models.User), Variation: v, FlagID: flag.ID}, nil
 
 	}
-
 	return nil, nil
 }
 
 // VariationFromUserTargeting checks to see if user has been specifically targeted
 // in a flag configuration and returns the varition if true
-func (e *EvaluationRequest) VariationFromUserTargeting(f *models.Flag) *models.Variation {
+func (e *EvaluationData) VariationFromUserTargeting(f *models.Flag) *models.Variation {
 	for _, variation := range f.Variations {
 		if len(variation.UserKeys) > 0 {
 			for _, key := range variation.UserKeys {
-				if key == e.User.Key {
+				user, ok := e.User.(models.User)
+				if !ok {
+					logrus.Error("cant cast user from request")
+					return nil
+				}
+				if key == user.Key {
 					return &variation
 				}
 			}

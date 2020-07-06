@@ -33,7 +33,7 @@ type Segment struct {
 //Variation represents a toggle option for a flag
 type Variation struct {
 	Name     string   `json:"name" bson:"name"`
-	Percent  int16    `json:"percent" bson:"percent"`
+	Percent  float64  `json:"percent" bson:"percent"`
 	UserKeys []string `json:"users,omitempty" bson:"users,omitempty"` // if a variation has specific users targeted
 }
 
@@ -54,12 +54,6 @@ type Attribute struct {
 	ID     bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 	Name   string        `json:"name" bson:"name"`
 	Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant"`
-}
-
-// Target is a specific user constraint
-type Target struct {
-	Rule       []Rule       `json:"rule" bson:"rule"` // multi rule combo
-	Variations *[]Variation `json:"variations" bson:"variations"`
 }
 
 // Tenant is a user of the system

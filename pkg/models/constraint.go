@@ -1,6 +1,8 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 
@@ -56,6 +58,8 @@ var OperatorToExprMap = map[string]string{
 	ConstraintOperatorCONTAINS:    "CONTAINS",
 	ConstraintOperatorNOTCONTAINS: "NOT CONTAINS",
 }
+
+// Targets is a collection of targets for a specific flag
 
 func (r *Rule) toExprStr() (string, error) {
 	if r.Attribute == "" || r.Operator == "" || r.Value == "" {
