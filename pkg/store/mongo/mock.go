@@ -68,6 +68,10 @@ func NewMockSession() Session {
 	return MockSession{}
 }
 
+func NewMockStore() Store {
+	return Store{DBName: "mock"}
+}
+
 // Close mocks mgo.Session.Close().
 func (ms MockSession) Close() {}
 

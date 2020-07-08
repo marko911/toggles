@@ -11,6 +11,9 @@ type WrapCollection struct {
 	*mgo.Collection
 }
 
+// CTXKey is the key used to embed mongo ref to context
+const CTXKey string = "mongo"
+
 // Collection is an interface to access to the collection struct.
 type Collection interface {
 	Find(query interface{}) *mgo.Query
