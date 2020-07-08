@@ -37,8 +37,6 @@ func (d Database) C(name string) Collection {
 // DataLayer is an interface to access to the database struct
 type DataLayer interface {
 	C(name string) Collection
-	// GetFlags(t Tenant) ([]Flag, error)
-	// GetSegments(t Tenant) ([]Segment, error)
 }
 
 // Session is an interface to access to the Session struct.
@@ -48,7 +46,7 @@ type Session interface {
 	SetSyncTimeout(d time.Duration)
 	SetSocketTimeout(d time.Duration)
 	Close()
-	Copy() Store
+	Copy() Session
 }
 
 // Store is a Mongo session.
@@ -63,6 +61,6 @@ func (s Store) DB(name string) DataLayer {
 }
 
 // Copy mocks mgo.Session.Copy()
-func (s Store) Copy() Store {
+func (s Store) Copy() Session {
 	return Store{s.Session.Copy(), s.DBName}
 }

@@ -33,7 +33,7 @@ func (s *Store) InsertFlag(f *models.Flag) error {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	err := d.C("flags").Insert(f)
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *Store) InsertSegment(seg *models.Segment) error {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	err := d.C("segments").Insert(seg)
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *Store) InsertUser(u *models.User) error {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	info, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *Store) UpsertUser(u *models.User) (*models.User, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 
 	_, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *Store) InsertAttributes(a []models.Attribute) error {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 
 	for _, attr := range a {
 		_, err := d.C("attributes").Upsert(bson.M{"name": attr.Name}, attr)
@@ -111,7 +111,7 @@ func (s *Store) GetFlags(t models.Tenant) ([]models.Flag, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 
 	var flags []models.Flag
 
@@ -129,7 +129,7 @@ func (s *Store) GetFlag(key string) (*models.Flag, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	var flag models.Flag
 	err := d.C("flags").Find(bson.M{"key": key}).One(&flag)
 	if err != nil {
@@ -143,7 +143,7 @@ func (s *Store) GetSegments(t models.Tenant) ([]models.Segment, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	var segments []models.Segment
 	err := d.C("segments").Find(bson.M{"tenant": t.ID}).All(&segments)
 
@@ -159,7 +159,7 @@ func (s *Store) GetUsers(t models.Tenant) ([]models.User, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
-	d := sess.DB(sess.DBName)
+	d := sess.DB(s.DBName)
 	var users []models.User
 	err := d.C("users").Find(bson.M{"tenant": t.ID}).All(&users)
 

@@ -41,7 +41,6 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 
 		if match {
 			if target.HasRolloutDistribution() {
-				// u, ok := e.User.(User)
 				var u User
 				err := mapstructure.Decode(e.User, &u)
 				if err != nil {
