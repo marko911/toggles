@@ -14,7 +14,7 @@ type User struct {
 	Key string
 }
 
-const PercentMultiplier float64 = 10
+const PercentMultiplier float64 = 100
 
 // MatchFlagTarget parses all flag rules returning a variation if
 // user matches
@@ -32,7 +32,6 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 			logrus.Error("Error getting expression from target ", err)
 			return nil, err
 		}
-		fmt.Println("ZZZZ", attrs)
 		// pass request data into expression evaluator
 		match, err := conditions.Evaluate(expr, attrs)
 		if err != nil {
@@ -50,16 +49,17 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 				}
 
 				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
+				fmt.Println("FRACTION", fraction)
 				//do hashing here and return variation
 				percents := target.Percentages()
 
 				var inRange bool
 
-				// abstract this away?
-
+				fmt.Println("PERCENTS", percents)
 				for i, p := range percents {
 					if i == 0 {
 						inRange = InRolloutRange(0, p/PercentMultiplier, fraction)
+						fmt.Println("i=0 in Range", inRange, p, p/PercentMultiplier)
 					} else {
 						inRange = InRolloutRange(percents[i-1], p/PercentMultiplier, fraction)
 					}
@@ -79,6 +79,7 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 
 // InRolloutRange checks if a value is in a range
 func InRolloutRange(min, max, val float64) bool {
+	fmt.Printf("IN RANGE CHECK min %v max %v val %v ", min, max, val)
 	if val >= min && val < max {
 		return true
 	}

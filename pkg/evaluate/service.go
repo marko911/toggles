@@ -2,7 +2,6 @@ package evaluate
 
 import (
 	"errors"
-	"fmt"
 	"toggle/server/pkg/models"
 
 	"github.com/mitchellh/mapstructure"
@@ -50,13 +49,15 @@ func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
 
 	var u models.User
 	err = mapstructure.Decode(e.User, &u)
+
 	if err != nil {
 		return nil, errors.New("Cant cast user to User model from request data")
 	}
+
 	if v := e.VariationFromUserTargeting(flag); v != nil {
 		return &models.EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
-	fmt.Println("FLAG TARGETS", flag.Targets[0].Rules)
+
 	v, err := e.MatchFlagTarget(flag.Targets)
 	if err != nil {
 		return nil, err
