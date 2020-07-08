@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"toggle/server/pkg/create"
+	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/middleware"
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
@@ -16,8 +17,9 @@ var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7e
 
 // Router contains all endpoints and provides a handler
 type Router struct {
-	Create create.Service
-	Read   read.Service
+	Create   create.Service
+	Read     read.Service
+	Evaluate evaluate.Service
 }
 
 // Handler returns an http.Handler encompassing all endpoint routes
@@ -29,7 +31,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
 
 	router.Use(
-		middleware.Store(ctx, r.Create, r.Read),
+		middleware.Store(ctx, r.Create, r.Read, r.Evaluate),
 		middleware.Tenant(ctx, tempTenant),
 	)
 

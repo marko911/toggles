@@ -7,6 +7,9 @@ import (
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/models"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 )
 
 // Evaluation represents a client request for flag evaluation
@@ -21,6 +24,10 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	createService := create.FromContext(r.Context())
 
+	tenant := models.TenantFromContext(r.Context())
+	u, _ := eval.User.(models.User)
+	u.Tenant = tenant.ID
+
 	errc := make(chan error, 1)
 	var wg sync.WaitGroup
 
@@ -28,7 +35,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err = createService.CreateUser(&eval.User); err != nil {
+		if err = createService.CreateUser(&u); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
 			errc <- err
 		}
@@ -38,7 +45,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err = createService.CreateAttributes(&eval.User); err != nil {
+		if err = createService.CreateAttributes(&u); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
 			errc <- err
 		}
@@ -54,22 +61,25 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		break
 	}
-
 	close(errc)
+	s := evaluate.FromContext(r.Context())
+	v, err := s.Evaluate(*eval)
 
-	//
-	respond(w, r, http.StatusCreated, "Eval created successfully")
+	if err != nil {
+		logrus.Error(err)
+		respondErr(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	respond(w, r, http.StatusCreated, v)
 
 }
 
-func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*evaluate.EvaluationRequest, error) {
-	var e evaluate.EvaluationRequest
-
-	tenant := models.TenantFromContext(r.Context())
-	e.User.Tenant = tenant.ID
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*evaluate.EvaluationData, error) {
+	var e evaluate.EvaluationData
 
 	if err := decodeBody(r, &e); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to read user from request", err)
+		respondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
 		return nil, err
 	}
 
@@ -78,7 +88,14 @@ func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*evaluate.Evalua
 		return nil, errors.New("")
 	}
 
-	if e.User.Key == "" {
+	var u models.User
+	err := mapstructure.Decode(e.User, &u)
+	if err != nil {
+		respondErr(w, r, http.StatusBadRequest, "Could not get user field from request: ", err)
+		return nil, err
+	}
+
+	if u.Key == "" {
 		respondErr(w, r, http.StatusBadRequest, "Unique user key is missing")
 		return nil, errors.New("")
 	}

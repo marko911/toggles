@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"toggle/server/pkg/create"
+	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/handler"
 	"toggle/server/pkg/read"
 	"toggle/server/pkg/store/mongo"
@@ -50,8 +51,9 @@ func NewServer(c *cli.Context) *Server {
 	s, err := mongo.NewMongoStore(c)
 	create := create.NewService(s)
 	read := read.NewService(s)
+	evaluate := evaluate.NewService(s)
 
-	r := handler.Router{Create: create, Read: read}
+	r := handler.Router{Create: create, Read: read, Evaluate: evaluate}
 	if err != nil {
 		logrus.Fatal(err)
 		return nil

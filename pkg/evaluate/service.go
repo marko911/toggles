@@ -1,8 +1,11 @@
 package evaluate
 
 import (
+	"errors"
+	"fmt"
 	"toggle/server/pkg/models"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,6 +15,7 @@ type EvaluationRequest struct {
 	User    models.User `json:"user"`
 }
 
+// EvaluationData wraps User into interface for passing to evaluation
 type EvaluationData struct {
 	FlagKey string
 	User    interface{}
@@ -39,23 +43,26 @@ func NewService(r Repository) Service {
 // Evaluate processes a client request and returns the variation to show to user
 func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
 	flag, err := s.r.GetFlag(e.FlagKey)
-
 	if err != nil {
+		logrus.Error("Error Getting flag", err)
 		return nil, err
 	}
 
+	var u models.User
+	err = mapstructure.Decode(e.User, &u)
+	if err != nil {
+		return nil, errors.New("Cant cast user to User model from request data")
+	}
 	if v := e.VariationFromUserTargeting(flag); v != nil {
-		return &models.EvaluationResult{User: e.User.(models.User), Variation: v, FlagID: flag.ID}, nil
+		return &models.EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
-
-	if v, err := e.MatchFlagTarget(flag.Targets); v != nil {
-		if err != nil {
-			return nil, err
-		}
-		return &models.EvaluationResult{User: e.User.(models.User), Variation: v, FlagID: flag.ID}, nil
-
+	fmt.Println("FLAG TARGETS", flag.Targets[0].Rules)
+	v, err := e.MatchFlagTarget(flag.Targets)
+	if err != nil {
+		return nil, err
 	}
-	return nil, nil
+	return &models.EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+
 }
 
 // VariationFromUserTargeting checks to see if user has been specifically targeted

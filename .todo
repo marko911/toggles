@@ -1,7 +1,6 @@
 
-TODO: Build evaluation layer
-  1. create conditions parser to return bool for matching of rules
-  2. create rollout builder, returning variation for matched rules
+TODO: Make tests for evaluation flow
+
 TODO: Build Auth
 TODO: Add NATS
 TODO: Add events

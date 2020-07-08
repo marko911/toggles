@@ -9,7 +9,7 @@ import (
 
 // Target is a specific user constraint
 type Target struct {
-	Rules      []Rule      `json:"rule" bson:"rule"`             // slice used to allow for multiple rules to be used as an AND condition
+	Rules      []Rule      `json:"rules" bson:"rules"`           // slice used to allow for multiple rules to be used as an AND condition
 	Variations []Variation `json:"variations" bson:"variations"` // distribution of variations if all rules pass
 }
 

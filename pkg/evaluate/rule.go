@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"toggle/server/pkg/models"
 
+	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 	"github.com/zhouzhuojie/conditions"
 )
 
@@ -18,30 +20,35 @@ const PercentMultiplier float64 = 10
 // user matches
 func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Variation, error) {
 	for _, target := range targets {
-
 		m, ok := e.User.(map[string]interface{})
 		if !ok {
-			return nil, errors.New("Cannot read evaluation request properly")
+			return nil, fmt.Errorf("Cannot read evaluation request properly %v", m)
 		}
+		attrs := m["attributes"].(map[string]interface{})
 
 		// build expression of target
 		expr, err := target.ToExpr()
 		if err != nil {
+			logrus.Error("Error getting expression from target ", err)
 			return nil, err
 		}
-
+		fmt.Println("ZZZZ", attrs)
 		// pass request data into expression evaluator
-		match, err := conditions.Evaluate(expr, m)
+		match, err := conditions.Evaluate(expr, attrs)
 		if err != nil {
+
 			return nil, err
 		}
 
 		if match {
 			if target.HasRolloutDistribution() {
-				u, ok := e.User.(User)
-				if !ok {
-					return nil, errors.New("Cannot read evaluation request properly")
+				// u, ok := e.User.(User)
+				var u User
+				err := mapstructure.Decode(e.User, &u)
+				if err != nil {
+					return nil, errors.New("Failed decoding user from evaluation request object")
 				}
+
 				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
 				//do hashing here and return variation
 				percents := target.Percentages()

@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"fmt"
 	"time"
 	"toggle/server/pkg/models"
 
@@ -67,14 +66,13 @@ func (s *Store) InsertUser(u *models.User) error {
 	defer sess.Close()
 
 	d := sess.DB(sess.DBName)
-	// err := d.C("users").Insert(u)
 	info, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 
 	if err != nil {
 		logrus.Warning(err)
 		return err
 	}
-	fmt.Println("info", info.UpsertedId)
+	logrus.Println("info", info.UpsertedId)
 	return nil
 }
 
