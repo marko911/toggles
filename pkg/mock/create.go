@@ -5,15 +5,16 @@ import "toggle/server/pkg/models"
 type mockCreate struct {
 }
 
-func (m *mockCreate) CreateFlag(*models.Flag) error {
+func (m *mockCreate) InsertFlag(*models.Flag) error {
 	return nil
 }
-func (m *mockCreate) CreateSegment(*models.Segment) error {
+func (m *mockCreate) InsertSegment(*models.Segment) error {
 	return nil
 }
-func (m *mockCreate) CreateUser(*models.User) error {
+func (m *mockCreate) InsertUser(*models.User) error {
 	return nil
 }
-func (m *mockCreate) CreateAttributes(*models.User) error {
+func (m *mockCreate) InsertAttributes([]models.Attribute) error {
+
 	return nil
 }
