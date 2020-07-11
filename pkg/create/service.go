@@ -30,8 +30,8 @@ func NewService(r Repository) Service {
 }
 
 // CreateFlag creates a new flag in repository
-func (s *service) CreateFlag(f *models.Flag) error {
-	err := s.r.InsertFlag(f)
+func (s *service) CreateFlag(flag *models.Flag) error {
+	err := s.r.InsertFlag(flag)
 	return err
 }
 
