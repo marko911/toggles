@@ -3,6 +3,7 @@ module toggle/server
 go 1.12
 
 require (
+	github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927
 	github.com/golang/mock v1.4.3
 	github.com/gorilla/mux v1.7.4
 	github.com/mitchellh/mapstructure v1.3.2

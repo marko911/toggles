@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"toggle/server/pkg/create"
+	"toggle/server/pkg/errors"
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
@@ -47,16 +49,21 @@ func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	tenant := models.TenantFromContext(r.Context())
 
 	flag := &models.Flag{Tenant: tenant.ID}
-
 	if err := decodeBody(r, flag); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to read flag from request ", err)
+		respondErr(w, r, http.StatusBadRequest, err)
 		return
+	}
+
+	if _, err := flag.Validate(); err != nil {
+		respondErr(w, r, http.StatusBadRequest, err)
+
 	}
 
 	if err := s.CreateFlag(flag); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, "failed to insert flag", err)
+		fmt.Println("flag flaw", flag.Name)
+		respondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
 		return
 	}
-	respond(w, r, http.StatusCreated, "Flag created successfully")
+	respond(w, r, http.StatusCreated, errors.SuccessFlagCreated)
 
 }

@@ -3,12 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"toggle/server/pkg/errors"
 )
 
 func decodeBody(r *http.Request, v interface{}) error {
 	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(v)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if len(body) == 0 {
+		return errors.ErrJSONPayloadEmpty
+	}
+	err = json.Unmarshal(body, &v)
+	return err
 }
 
 func decodeBodyKeepOpen(r *http.Request, v interface{}) error {
