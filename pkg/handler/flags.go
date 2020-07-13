@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/errors"
@@ -20,7 +19,7 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		HandleFlagsPost(w, r)
 		return
-		// case "DELETE":
+		// case "DELETE": TODO: implemenet
 		// 	HandleFlagsDelete(w, r)
 		// 	return
 	}
@@ -60,7 +59,6 @@ func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.CreateFlag(flag); err != nil {
-		fmt.Println("flag flaw", flag.Name)
 		respondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
 		return
 	}

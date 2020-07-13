@@ -1,32 +1,11 @@
 package mongo
 
 import (
-	"time"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
-	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
-
-// NewMongoStore returns a new Mongo Session.
-func NewMongoStore(c *cli.Context) (*Store, error) {
-	mgoSession, err := mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs:    []string{c.String("database-address")},
-		Username: c.String("mongo-username"),
-		Password: c.String("mongo-password"),
-	})
-	if err != nil {
-		return nil, err
-	}
-	session := Store{mgoSession, c.String("database-name")}
-	session.SetSafe(&mgo.Safe{})
-	session.SetSyncTimeout(3 * time.Second)
-	session.SetSocketTimeout(3 * time.Second)
-	return &session, nil
-
-}
 
 // InsertFlag saves a flag to mongo
 func (s *Store) InsertFlag(f *models.Flag) error {

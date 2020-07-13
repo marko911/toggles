@@ -18,6 +18,8 @@ func SegmentsHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		HandleSegmentsPost(w, r)
 		return
+		// case "DELETE": TODO:implement
+		// 	return
 	}
 
 	respondHTTPErr(w, r, http.StatusNotFound)
