@@ -19,6 +19,14 @@ var (
 	//ErrFailedCreateFlag is returned when flag creation fails
 	ErrFailedCreateFlag = errors.New("Error creating flag")
 
+	//ErrEvalRequestMissingFlag is returned when eval request has no flag id
+	ErrEvalRequestMissingFlag = errors.New("FlagID is required")
+
+	//ErrEvalRequestMissingUser is returned when user field is missing from request
+	ErrEvalRequestMissingUser = errors.New("User field is required")
+
+	//ErrFlagNotFound is returned when flag is not in database
+	ErrFlagNotFound = errors.New("Flag not found, invalid key")
 	//SuccessFlagCreated is message returned on success of flag post
 	SuccessFlagCreated = "Flag created successfully"
 )

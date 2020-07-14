@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"sync"
 	"toggle/server/pkg/create"
+	"toggle/server/pkg/errors"
 	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/models"
 
@@ -17,13 +17,11 @@ import (
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
-	eval, err := handleEvalRequest(w, r)
-	if err != nil {
-		return
+	eval := handleEvalRequest(w, r)
+	if eval == nil {
+		return // error occured and response error was already written to w
 	}
-
 	createService := create.FromContext(r.Context())
-
 	tenant := models.TenantFromContext(r.Context())
 	u, _ := eval.User.(models.User)
 	u.Tenant = tenant.ID
@@ -35,7 +33,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err = createService.CreateUser(&u); err != nil {
+		if err := createService.CreateUser(&u); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
 			errc <- err
 		}
@@ -45,7 +43,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err = createService.CreateAttributes(&u); err != nil {
+		if err := createService.CreateAttributes(&u); err != nil {
 			respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
 			errc <- err
 		}
@@ -61,7 +59,9 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		break
 	}
+
 	close(errc)
+
 	s := evaluate.FromContext(r.Context())
 	v, err := s.Evaluate(*eval)
 
@@ -75,31 +75,31 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handleEvalRequest(w http.ResponseWriter, r *http.Request) (*evaluate.EvaluationData, error) {
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.EvaluationData {
 	var e evaluate.EvaluationData
 
 	if err := decodeBody(r, &e); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
-		return nil, err
+		return nil
 	}
 
 	if e.FlagKey == "" {
-		respondErr(w, r, http.StatusBadRequest, "Must provide flag key")
-		return nil, errors.New("")
+		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingFlag)
+		return nil
 	}
 
 	var u models.User
 	err := mapstructure.Decode(e.User, &u)
 	if err != nil {
-		respondErr(w, r, http.StatusBadRequest, "Could not get user field from request: ", err)
-		return nil, err
+		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
+		return nil
 	}
 
 	if u.Key == "" {
-		respondErr(w, r, http.StatusBadRequest, "Unique user key is missing")
-		return nil, errors.New("")
+		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
+		return nil
 	}
 
-	return &e, nil
+	return &e
 
 }

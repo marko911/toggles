@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -54,7 +53,6 @@ func TestHandleFlagsGet(t *testing.T) {
 				w.Code, checkMark)
 
 			content, err := ioutil.ReadAll(w.Body)
-			fmt.Println("connnt", string(content))
 			is.NoErr(err)
 			is.OK(len(content))
 			t.Log("\t\tShould receive flags from repository.",
@@ -114,7 +112,7 @@ func TestHandleFlagsPost(t *testing.T) {
 		},
 	)
 
-	t.Log("Given the need to be able to create a new flag")
+	t.Log("Given the need to be able to create a new flag:")
 	{
 		for name, tc := range cases {
 			t.Run(name, func(t *testing.T) {
@@ -129,36 +127,11 @@ func TestHandleFlagsPost(t *testing.T) {
 				handler := http.HandlerFunc(HandleFlagsPost)
 				handler.ServeHTTP(w, req)
 				respStr := w.Body.String()
-				correctErr := strings.Contains(respStr, tc.Expected)
-				s := fmt.Sprintf("%v\t '%v' contains \n'%v :%v", name, respStr, tc.Expected, correctErr)
-				fmt.Println(s)
 				is.OK(strings.Contains(respStr, tc.Expected))
+				t.Logf("\t\tShould receive a \"%s\" message. %v",
+					tc.Expected, checkMark)
 			})
 		}
-		// t.Logf("\tWhen checking \"%s\" for status code \"%d\"", "/flags", 200)
-		{
-			// body:=
 
-		}
 	}
 }
-
-// tests := map[string]struct {
-// 	Body     io.Reader
-// 	Expected string
-// }{
-// 	"simple":       {input: "a/b/c", sep: "/", want: []string{"a", "b", "c"}},
-// 	"wrong sep":    {input: "a/b/c", sep: ",", want: []string{"a/b/c"}},
-// 	"no sep":       {input: "abc", sep: "/", want: []string{"abc"}},
-// 	"trailing sep": {input: "a/b/c/", sep: "/", want: []string{"a", "b", "c"}},
-// }
-
-// for name, tc := range tests {
-// 	t.Run(name, func(t *testing.T) {
-// 		// got := Split(tc.input, tc.sep)
-// 		diff := cmp.Diff(tc.want, got)
-// 		if diff != "" {
-// 			t.Fatalf(diff)
-// 		}
-// 	})
-// }

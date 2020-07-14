@@ -3,7 +3,7 @@ package mongo
 import (
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -24,4 +24,3 @@ func NewMongoStore(c *cli.Context) (*Store, error) {
 	return &session, nil
 
 } // NewMongoStore returns a new Mongo Session.
-}

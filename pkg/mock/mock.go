@@ -6,27 +6,7 @@ import (
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/read"
 	"toggle/server/pkg/store/mongo"
-
-	"github.com/golang/mock/gomock"
 )
-
-// Manager is a mock manager instance
-type Manager struct {
-	controller *gomock.Controller
-}
-
-// Mock returns a new gomock controller
-func Mock(t *testing.T) *Manager {
-	mockCtrl := gomock.NewController(t)
-	return &Manager{
-		controller: mockCtrl,
-	}
-}
-
-//Done signals to controller that mocks are called
-func (m *Manager) Done() {
-	m.controller.Finish()
-}
 
 // CreateContext takes context wrapping functions and returns a context with all functions applied to it
 func CreateContext(t *testing.T, f ...func(c context.Context) context.Context) context.Context {

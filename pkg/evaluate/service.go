@@ -14,7 +14,7 @@ type EvaluationRequest struct {
 	User    models.User `json:"user"`
 }
 
-// EvaluationData wraps User into interface for passing to evaluation
+// EvaluationData wraps User into interface for passing to evaluation library
 type EvaluationData struct {
 	FlagKey string
 	User    interface{}
@@ -43,7 +43,7 @@ func NewService(r Repository) Service {
 func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
-		logrus.Error("Error Getting flag", err)
+		logrus.Error("Could not get flag with key: ", e.FlagKey)
 		return nil, err
 	}
 

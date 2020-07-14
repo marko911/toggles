@@ -2,7 +2,6 @@ package mock
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"toggle/server/pkg/models"
 )
@@ -15,10 +14,7 @@ type mockRead struct {
 
 func (m *mockRead) GetFlags(models.Tenant) ([]models.Flag, error) {
 	var flags []models.Flag
-	files, err := ioutil.ReadDir(m.flagsPath)
-	for _, file := range files {
-		fmt.Println("file", file)
-	}
+
 	content, err := ioutil.ReadFile(m.flagsPath)
 	if err != nil {
 		return nil, err
