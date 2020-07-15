@@ -32,7 +32,7 @@ var missingFieldUser = []byte(`{
 }`)
 
 var invalidFlagKey = []byte(`{
-	"flagKey":"not-existing",
+	"flagKey":"doesnt-matter-whats-here",
 	"user": {
 		"key":"marko@hey.com",
 		"attributes": {

@@ -12,7 +12,8 @@ type Evaluate struct {
 	FlagPath string
 }
 
-// EvaluateInvalidFlagKey implements an evaluation repository for a mock method
+// EvaluateInvalidFlagKey implements an evaluation repository with a receiver
+// that is a mock
 type EvaluateInvalidFlagKey struct{}
 
 //GetFlag returns an error as a mock to a failed db request for a bad flag key
