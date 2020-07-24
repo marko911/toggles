@@ -1,7 +1,6 @@
 package evaluate
 
 import (
-	"fmt"
 	"math"
 	"testing"
 	"toggle/server/pkg/mock"
@@ -45,15 +44,6 @@ func Test_service_Evaluate(t *testing.T) {
 			},
 			false,
 		},
-		// {
-		// 	"default flag distribution",
-		// },
-		// {
-		// 	"correct distribution for targets on flag"
-		// },
-		// {
-		// 	""
-		// }
 	}
 
 	t.Log("Given the need to match a variation to a request:")
@@ -117,7 +107,9 @@ func TestMatchingDistributions(t *testing.T) {
 		}
 		randomKeyCharset := []byte("123456789abcdefghijkmnopqrstuvwxyz")
 		is := is.New(t)
+
 		var red, purple, blue int
+
 		numUserS := 1000
 		// generate random users eval requests
 		for i := 1; i < numUserS; i++ {
@@ -131,21 +123,22 @@ func TestMatchingDistributions(t *testing.T) {
 			e := EvaluationData{"alpha-users", u}
 
 			got, err := s.Evaluate(e)
-			// fmt.Println("GOT", got)
+
 			is.NoErr(err)
+
 			if got.Variation.Name == "Red" {
 				red++
 			}
+
 			if got.Variation.Name == "Blue" {
 				blue++
 			}
+
 			if got.Variation.Name == "Purple" {
 				purple++
 			}
 		}
-		fmt.Println("Red", red)
-		fmt.Println("Blue", blue)
-		fmt.Println("Purple", purple)
+
 		getErrorDiff := func(target, actual int) float64 {
 			diff := math.Abs(float64(target - actual))
 			percent := (diff / float64(numUserS)) * 10
