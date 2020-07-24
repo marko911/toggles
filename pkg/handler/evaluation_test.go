@@ -83,7 +83,9 @@ func TestEvaluationHandler(t *testing.T) {
 
 				req = req.WithContext(ctx)
 				h, w := testutil.GetHandler(ctx, EvaluationHandler)
+
 				h.ServeHTTP(w, req)
+
 				respStr := w.Body.String()
 				is.OK(strings.Contains(respStr, tc.Expected))
 				t.Logf("\t\tShould receive a \"%s\" message. %v",

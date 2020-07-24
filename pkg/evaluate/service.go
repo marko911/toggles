@@ -50,6 +50,7 @@ func NewService(r Repository) Service {
 
 // Evaluate processes a client request and returns the variation to show to user
 func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
+
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
 		logrus.Error("Could not get flag with key: ", e.FlagKey)
@@ -58,7 +59,6 @@ func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
 
 	var u models.User
 	err = mapstructure.Decode(e.User, &u)
-
 	if err != nil {
 		return nil, errors.ErrCantCastUser
 	}

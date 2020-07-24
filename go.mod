@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927
+	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
 	github.com/golang/mock v1.4.3
 	github.com/google/go-cmp v0.5.0
 	github.com/gorilla/mux v1.7.4

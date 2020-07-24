@@ -14,12 +14,19 @@ type user struct {
 	Key string `json:"key"`
 }
 
+type userAttr struct {
+	Key        string
+	Attributes map[string]interface{}
+}
+
 const percentMultiplier float64 = 100
 
 // MatchFlagTarget parses all flag rules returning a variation if
 // user matches
 func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Variation, error) {
+
 	for _, target := range targets {
+
 		m, ok := e.User.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("Cannot read evaluation request properly %v", m)
@@ -28,18 +35,20 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 
 		// build expression of target
 		expr, err := target.ToExpr()
+
 		if err != nil {
 			logrus.Error("Error getting expression from target ", err)
 			return nil, err
 		}
 		// pass request data into expression evaluator
 		match, err := conditions.Evaluate(expr, attrs)
-		if err != nil {
 
+		if err != nil {
 			return nil, err
 		}
 
 		if match {
+
 			if target.HasRolloutDistribution() {
 				var u user
 				err := mapstructure.Decode(e.User, &u)
@@ -49,16 +58,18 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 
 				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
 				percents := target.Percentages()
-
 				var inRange bool
+				var min, accumulatedMax float64
 
-				fmt.Println("PERCENTS", percents)
 				for i, p := range percents {
 					if i == 0 {
-						inRange = InRolloutRange(0, p/percentMultiplier, fraction)
+						min = 0
 					} else {
-						inRange = InRolloutRange(percents[i-1]/percentMultiplier, (percents[i-1]+p)/percentMultiplier, fraction)
+						min = accumulatedMax
 					}
+					accumulatedMax += p / percentMultiplier
+
+					inRange = InRolloutRange(min, accumulatedMax, fraction)
 					if inRange {
 						variation := target.Variations[i]
 						return &variation, nil

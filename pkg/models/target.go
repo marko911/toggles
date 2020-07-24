@@ -24,7 +24,6 @@ func (t Target) ToExpr() (conditions.Expr, error) {
 		strs = append(strs, s)
 	}
 	exprStr := strings.Join(strs, " AND ")
-	fmt.Println("EXPRESSSNs", exprStr)
 	p := conditions.NewParser(strings.NewReader(exprStr))
 	expr, err := p.Parse()
 	if err != nil {
@@ -51,6 +50,7 @@ func (t Target) GetMatchingVariation() *Variation {
 			return &v
 		}
 	}
+
 	return nil
 }
 

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,7 +26,7 @@ type Server struct {
 var fatalErr error
 
 func fatal(e error) {
-	fmt.Println(e)
+	logrus.Fatal(e)
 	flag.PrintDefaults()
 	fatalErr = e
 }

@@ -33,3 +33,17 @@ func (m *Evaluate) GetFlag(key string) (*models.Flag, error) {
 
 	return &flag, nil
 }
+
+//EvaluateByte is a flag in JSON format
+type EvaluateByte struct {
+	Flag []byte
+}
+
+// GetFlag casts a flag from JSON
+func (e *EvaluateByte) GetFlag(key string) (*models.Flag, error) {
+	var flag models.Flag
+
+	json.Unmarshal(e.Flag, &flag)
+	return &flag, nil
+
+}
