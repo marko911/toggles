@@ -1,11 +1,12 @@
 package evaluate
 
 import (
-	"errors"
+	"toggle/server/pkg/errors"
 	"toggle/server/pkg/models"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // EvaluationRequest represents an a client request on a flag key
@@ -20,9 +21,17 @@ type EvaluationData struct {
 	User    interface{}
 }
 
+// EvaluationResult determines what variation user is shown, can be simple true or false
+// or a specific variation of flag being evaluated
+type EvaluationResult struct {
+	User      models.User
+	Variation *models.Variation
+	FlagID    bson.ObjectId `json:"flagId"`
+}
+
 // Service runs evaluation operations on client feature flag requests
 type Service interface {
-	Evaluate(e EvaluationData) (*models.EvaluationResult, error)
+	Evaluate(e EvaluationData) (*EvaluationResult, error)
 }
 
 // Repository holds all persisted data related to flags, users, attributes, segments
@@ -40,7 +49,7 @@ func NewService(r Repository) Service {
 }
 
 // Evaluate processes a client request and returns the variation to show to user
-func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
+func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
 		logrus.Error("Could not get flag with key: ", e.FlagKey)
@@ -51,33 +60,29 @@ func (s *service) Evaluate(e EvaluationData) (*models.EvaluationResult, error) {
 	err = mapstructure.Decode(e.User, &u)
 
 	if err != nil {
-		return nil, errors.New("Cant cast user to User model from request data")
+		return nil, errors.ErrCantCastUser
 	}
 
-	if v := e.VariationFromUserTargeting(flag); v != nil {
-		return &models.EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+	if v := e.VariationFromUserTargeting(flag, &u); v != nil {
+		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
 	v, err := e.MatchFlagTarget(flag.Targets)
+
 	if err != nil {
 		return nil, err
 	}
-	return &models.EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+	return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 
 }
 
 // VariationFromUserTargeting checks to see if user has been specifically targeted
 // in a flag configuration and returns the varition if true
-func (e *EvaluationData) VariationFromUserTargeting(f *models.Flag) *models.Variation {
+func (e *EvaluationData) VariationFromUserTargeting(f *models.Flag, u *models.User) *models.Variation {
 	for _, variation := range f.Variations {
 		if len(variation.UserKeys) > 0 {
 			for _, key := range variation.UserKeys {
-				user, ok := e.User.(models.User)
-				if !ok {
-					logrus.Error("cant cast user from request")
-					return nil
-				}
-				if key == user.Key {
+				if key == u.Key {
 					return &variation
 				}
 			}

@@ -10,11 +10,11 @@ import (
 	"github.com/zhouzhuojie/conditions"
 )
 
-type User struct {
-	Key string
+type user struct {
+	Key string `json:"key"`
 }
 
-const PercentMultiplier float64 = 100
+const percentMultiplier float64 = 100
 
 // MatchFlagTarget parses all flag rules returning a variation if
 // user matches
@@ -41,7 +41,7 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 
 		if match {
 			if target.HasRolloutDistribution() {
-				var u User
+				var u user
 				err := mapstructure.Decode(e.User, &u)
 				if err != nil {
 					return nil, errors.New("Failed decoding user from evaluation request object")
@@ -55,9 +55,9 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 				fmt.Println("PERCENTS", percents)
 				for i, p := range percents {
 					if i == 0 {
-						inRange = InRolloutRange(0, p/PercentMultiplier, fraction)
+						inRange = InRolloutRange(0, p/percentMultiplier, fraction)
 					} else {
-						inRange = InRolloutRange(percents[i-1]/PercentMultiplier, (percents[i-1]+p)/PercentMultiplier, fraction)
+						inRange = InRolloutRange(percents[i-1]/percentMultiplier, (percents[i-1]+p)/percentMultiplier, fraction)
 					}
 					if inRange {
 						variation := target.Variations[i]

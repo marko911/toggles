@@ -22,6 +22,9 @@ var (
 	//ErrEvalRequestMissingFlag is returned when eval request has no flag id
 	ErrEvalRequestMissingFlag = errors.New("FlagID is required")
 
+	//ErrCantCastUser returns when invalid user data is passed to evaluate
+	ErrCantCastUser = errors.New("cannot cast user from request")
+
 	//ErrEvalRequestMissingUser is returned when user field is missing from request
 	ErrEvalRequestMissingUser = errors.New("User field is required")
 

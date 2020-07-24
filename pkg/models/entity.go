@@ -60,11 +60,3 @@ type Attribute struct {
 type Tenant struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 }
-
-// EvaluationResult determines what variation user is shown, can be simple true or false
-// or a specific variation of flag being evaluated
-type EvaluationResult struct {
-	User      User
-	Variation *Variation
-	FlagID    bson.ObjectId `json:"flagId"`
-}
