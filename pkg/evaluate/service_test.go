@@ -32,14 +32,76 @@ const ballotX = "\u2717"
 
 func Test_service_Evaluate(t *testing.T) {
 
+	userTarget := []byte(`{
+		"id": { "$oid": "5f09d08d40a5b800068a5d88" },
+		"name": "Young chicks",
+		"key": "hey-ladies",
+		"enabled": true,
+		"variations": [
+			{
+				"name": "On",
+				"percent": 100,
+				"users": ["jenny@hey.com", "mary@hey.com"]
+			},
+			{ "name": "Off", "percent": 0 }
+		],
+	
+		"tenant": { "$oid": "5ef5f06a4fc7eb0006772c49" }
+	}
+	`)
+
+	defaultTargetFlag := []byte(`{
+		"id": { "$oid": "5f09d08d40a5b800068a5d88" },
+		"name": "alpha users",
+		"key": "alpha-users",
+		"enabled": true,
+		"variations": [
+			{ "name": "Red", "percent": 100 },
+			{ "name": "Blue", "percent": 0 },
+			{ "name": "Purple", "percent": 0 }
+		],
+		"targets": [
+			{
+				"rules": [
+					{ "attribute": "groups", "operator": "CONTAINS", "value": "\"alpha users\"" }
+				],
+				"variations": [
+					{ "name": "Red", "percent": 30 },
+					{ "name": "Blue", "percent": 50 },
+					{ "name": "Purple", "percent": 20 }
+				]
+			}
+		]
+		
+		}	
+	`)
+
 	tests := []testCase{
 		{
 			"flag with user targeting",
-			fields{r: &mock.Evaluate{FlagPath: "../../static/flagUserTargets.json"}},
+			fields{r: &mock.EvaluateByte{Flag: userTarget}},
 			args{EvaluationData{"hey-ladies", user{Key: "jenny@hey.com"}}},
 			&EvaluationResult{
 				models.User{Key: "jenny@hey.com"},
 				&models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
+				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
+			},
+			false,
+		},
+		{
+			"flag default target Red variation",
+			fields{r: &mock.EvaluateByte{Flag: defaultTargetFlag}},
+			args{EvaluationData{"hey-ladies", map[string]interface{}{
+				"key": "jenny@hey.com",
+				"attributes": map[string]interface{}{
+					"groups": []string{"ladies"},
+				},
+			}}},
+			&EvaluationResult{
+				models.User{Key: "jenny@hey.com", Attributes: map[string]interface{}{
+					"groups": []string{"ladies"},
+				}},
+				&models.Variation{Name: "Red", Percent: 100},
 				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
 			},
 			false,
@@ -87,8 +149,9 @@ func TestMatchingDistributions(t *testing.T) {
 				"key": "alpha-users",
 				"enabled": true,
 				"variations": [
-					{ "name": "On", "percent": 0 },
-					{ "name": "Off", "percent": 100 }
+					{ "name": "Red", "percent": 100 },
+					{ "name": "Blue", "percent": 0 },
+					{ "name": "Purple", "percent": 0 }
     		],
 				"targets": [
 					{

@@ -67,12 +67,21 @@ func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
 		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
-	v, err := e.MatchFlagTarget(flag.Targets)
-
-	if err != nil {
-		return nil, err
+	if v, err := e.MatchFlagTarget(flag.Targets); v != nil {
+		if err != nil {
+			return nil, err
+		}
+		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
-	return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+
+	if v, err := e.MatchDefaultVariations(flag); v != nil {
+		if err != nil {
+			return nil, err
+		}
+		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+	}
+
+	return nil, errors.ErrVariationNotFound
 
 }
 

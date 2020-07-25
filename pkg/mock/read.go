@@ -7,7 +7,7 @@ import (
 )
 
 type mockRead struct {
-	flagsPath string
+	flagsJSON []byte
 	segsPath  *string
 	usersPath *string
 }
@@ -15,11 +15,7 @@ type mockRead struct {
 func (m *mockRead) GetFlags(models.Tenant) ([]models.Flag, error) {
 	var flags []models.Flag
 
-	content, err := ioutil.ReadFile(m.flagsPath)
-	if err != nil {
-		return nil, err
-	}
-	json.Unmarshal(content, &flags)
+	json.Unmarshal(m.flagsJSON, &flags)
 
 	return flags, nil
 }

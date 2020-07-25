@@ -10,7 +10,7 @@ import (
 
 var randomKeyCharset = []byte("123456789abcdefghijkmnopqrstuvwxyz")
 
-func NewTargetsWithGroup(a, v, o string) []models.Target {
+func GenerateTarget(a, o, v string) []models.Target {
 	r := []models.Target{
 		{
 			Rules: []models.Rule{
@@ -49,7 +49,105 @@ func TestEvaluationData_MatchFlagTarget(t *testing.T) {
 				},
 			},
 			},
-			args{targets: NewTargetsWithGroup("groups", "\"males\"", "CONTAINS")}, // always have to provide quoted value to evaluation lib
+			args{targets: GenerateTarget("groups", models.ConstraintOperatorCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"NOT CONTAINS operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"groups": []string{"gorillas"},
+				},
+			},
+			},
+			args{targets: GenerateTarget("groups", models.ConstraintOperatorNOTCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"IN operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"name": "marko",
+				},
+			},
+			},
+			args{targets: GenerateTarget("name", models.ConstraintOperatorIN, `["marko","hana"]`)},
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"NOT IN operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"name": "jack",
+				},
+			},
+			},
+			args{targets: GenerateTarget("name", models.ConstraintOperatorNOTIN, `["marko","hana"]`)},
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"EQ operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"name": "jack",
+				},
+			},
+			},
+			args{targets: GenerateTarget("name", models.ConstraintOperatorEQ, "\"jack\"")},
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"LT operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"age": 25,
+				},
+			},
+			},
+			args{targets: GenerateTarget("age", models.ConstraintOperatorLT, "40")},
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"LTE operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"age": 40,
+				},
+			},
+			},
+			args{targets: GenerateTarget("age", models.ConstraintOperatorLTE, "40")},
+			&models.Variation{
+				Name: "On", Percent: 100,
+			},
+			false,
+		},
+		{
+			"EREG operator", fields{"beta-users", map[string]interface{}{
+				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
+				"attributes": map[string]interface{}{
+					"regex": "John",
+				},
+			},
+			},
+			args{targets: GenerateTarget("regex", models.ConstraintOperatorEREG, `"([A-Z])\w+"`)},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
@@ -62,7 +160,6 @@ func TestEvaluationData_MatchFlagTarget(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			t.Logf("When using the %s and providing a matching attribute", tt.name)
 
 			e := &EvaluationData{
 				FlagKey: tt.fields.FlagKey,
@@ -78,8 +175,8 @@ func TestEvaluationData_MatchFlagTarget(t *testing.T) {
 			if diff != "" {
 				t.Fatalf(diff)
 			}
-			t.Logf("\t\tShould receive a \"%s\" variation. %v",
-				tt.want.Name, checkMark)
+			t.Logf("\n\t When using the  %s , Should receive a \"%s\" variation. %v",
+				tt.name, tt.want.Name, checkMark)
 		})
 	}
 }

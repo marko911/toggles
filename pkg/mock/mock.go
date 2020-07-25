@@ -31,7 +31,42 @@ func initDatabaseMemoryStore(c context.Context) context.Context {
 
 func initReadService(c context.Context) context.Context {
 	mockReadService := read.NewService(&mockRead{
-		flagsPath: "../../config/flags.json",
+		flagsJSON: []byte(`[
+			{
+				"_id": { "$oid": "5f09cd037815899375759b9b" },
+				"name": "Early testers",
+				"key": "",
+				"enabled": true,
+				"variations": [
+					{ "name": "On", "percent": 100 },
+					{ "name": "Off", "percent": 0 }
+				],
+				"tenant": { "$oid": "5ef5f06a4fc7eb0006772c49" }
+			},
+			{
+				"_id": { "$oid": "5f09d08d40a5b800068a5d88" },
+				"name": "Young chicks",
+				"key": "hey-ladies",
+				"enabled": true,
+				"variations": [
+					{ "name": "On", "percent": 100 },
+					{ "name": "Off", "percent": 0 }
+				],
+				"targets": [
+					{
+						"rules": [
+							{ "attribute": "gender", "operator": "EQ", "value": "female" }
+						],
+						"variations": [
+							{ "name": "On", "percent": 100 },
+							{ "name": "Off", "percent": 0 }
+						]
+					}
+				],
+				"tenant": { "$oid": "5ef5f06a4fc7eb0006772c49" }
+			}
+		]
+		`),
 	})
 	return context.WithValue(c, read.ServiceKey, mockReadService)
 }

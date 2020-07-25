@@ -53,20 +53,3 @@ func (t Target) GetMatchingVariation() *Variation {
 
 	return nil
 }
-
-// Percentages returns a slice of varations' percentages
-func (t Target) Percentages() []float64 {
-	percentages := []float64{}
-	for _, v := range t.Variations {
-		percentages = append(percentages, v.Percent)
-	}
-	return percentages
-}
-
-// // Rollout returns a variation based on rollout percentages
-// func (t Target) Rollout(salt string) *Variation {
-// 	percents := t.Percentages()
-// 	// return something else
-
-// 	return nil
-// }

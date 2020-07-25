@@ -30,6 +30,10 @@ var (
 
 	//ErrFlagNotFound is returned when flag is not in database
 	ErrFlagNotFound = errors.New("Flag not found, invalid key")
+
+	//ErrVariationNotFound is returned when default rollout cannot match variation
+	ErrVariationNotFound = errors.New("Variation not matched")
+
 	//SuccessFlagCreated is message returned on success of flag post
 	SuccessFlagCreated = "Flag created successfully"
 )

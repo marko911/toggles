@@ -3,6 +3,7 @@ package evaluate
 import (
 	"errors"
 	"fmt"
+	er "toggle/server/pkg/errors"
 	"toggle/server/pkg/models"
 
 	"github.com/mitchellh/mapstructure"
@@ -57,7 +58,7 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 				}
 
 				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
-				percents := target.Percentages()
+				percents := Percents(target.Variations)
 				var inRange bool
 				var min, accumulatedMax float64
 
@@ -84,6 +85,38 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 	return nil, nil
 }
 
+// MatchDefaultVariations returns the default variation for this user
+func (e *EvaluationData) MatchDefaultVariations(f *models.Flag) (*models.Variation, error) {
+	var u user
+	err := mapstructure.Decode(e.User, &u)
+	if err != nil {
+		return nil, errors.New("Failed decoding user from evaluation request object")
+	}
+
+	fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
+	percents := Percents(f.Variations)
+	var inRange bool
+	var min, accumulatedMax float64
+
+	for i, p := range percents {
+		if i == 0 {
+			min = 0
+		} else {
+			min = accumulatedMax
+		}
+		accumulatedMax += p / percentMultiplier
+
+		inRange = InRolloutRange(min, accumulatedMax, fraction)
+		if inRange {
+			variation := f.Variations[i]
+			return &variation, nil
+		}
+	}
+
+	return nil, er.ErrVariationNotFound
+
+}
+
 // InRolloutRange checks if a value is in a range
 func InRolloutRange(min, max, val float64) bool {
 	if val >= min && val < max {
@@ -91,4 +124,13 @@ func InRolloutRange(min, max, val float64) bool {
 	}
 
 	return false
+}
+
+// Percents return a list of percentages from variations
+func Percents(v []models.Variation) []float64 {
+	percentages := []float64{}
+	for _, vari := range v {
+		percentages = append(percentages, vari.Percent)
+	}
+	return percentages
 }
