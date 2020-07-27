@@ -35,6 +35,7 @@ type Variation struct {
 	Name     string   `json:"name" bson:"name"`
 	Percent  float64  `json:"percent" bson:"percent"`
 	UserKeys []string `json:"users,omitempty" bson:"users,omitempty"` // if a variation has specific users targeted
+	Limit    int      `json:"limit,omitempty" bson:"limit,omitempty"`
 }
 
 // User represents a client request

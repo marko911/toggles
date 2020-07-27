@@ -81,7 +81,7 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 			return target.GetMatchingVariation(), nil
 		}
 	}
-	// change
+	// no rule matched
 	return nil, nil
 }
 

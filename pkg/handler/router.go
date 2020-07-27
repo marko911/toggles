@@ -25,9 +25,12 @@ type Router struct {
 // Handler returns an http.Handler encompassing all endpoint routes
 func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router := mux.NewRouter()
+	tenantRoutes := mux.NewRouter()
 
-	router.HandleFunc("/flags", FlagsHandler)
-	router.HandleFunc("/segments", SegmentsHandler)
+	tenantRoutes.HandleFunc("/flags", FlagsHandler)
+	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
+
+	router.PathPrefix("/api").Handler(middleware.Auth(ctx))
 	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
 
 	router.Use(
