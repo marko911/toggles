@@ -8,7 +8,6 @@ import (
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/urfave/cli/v2"
 	"github.com/urfave/negroni"
 )
 
@@ -28,37 +27,33 @@ type JSONWebKeys struct {
 }
 
 // Auth middleware
-func Auth(ctx *cli.Context) func(http.Handler) http.Handler {
+func Auth() negroni.Handler {
+	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			// Verify 'aud' claim
+			aud := os.Getenv("AUTH0_AUDIENCE")
+			checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
+			if !checkAud {
+				return token, errors.New("Invalid audience.")
+			}
+			// Verify 'iss' claim
+			iss := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
+			checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
+			if !checkIss {
+				return token, errors.New("Invalid issuer.")
+			}
 
-	return func(next http.Handler) http.Handler {
-		jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
-			ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-				// Verify 'aud' claim
-				aud := os.Getenv("AUTH0_AUDIENCE")
-				checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
-				if !checkAud {
-					return token, errors.New("Invalid audience.")
-				}
-				// Verify 'iss' claim
-				iss := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
-				checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
-				if !checkIss {
-					return token, errors.New("Invalid issuer.")
-				}
+			cert, err := getPemCert(token)
+			if err != nil {
+				panic(err.Error())
+			}
 
-				cert, err := getPemCert(token)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-				return result, nil
-			},
-			SigningMethod: jwt.SigningMethodRS256,
-		})
-		return negroni.HandlerFunc(jwtMiddleware.HandlerWithNext)
-	}
-
+			result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+			return result, nil
+		},
+		SigningMethod: jwt.SigningMethodRS256,
+	})
+	return negroni.HandlerFunc(jwtMiddleware.HandlerWithNext)
 }
 
 func getPemCert(token *jwt.Token) (string, error) {

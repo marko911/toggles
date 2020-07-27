@@ -50,6 +50,11 @@ func main() {
 				EnvVars:     []string{"MONGO_INITDB_ROOT_PASSWORD"},
 				DefaultText: "pass",
 			},
+			&cli.StringSliceFlag{
+				EnvVars: []string{"SERVER_ALLOWED_HOSTS"},
+				Name:    "server-allowed-hosts",
+				Usage:   "server allowed hosts (CORS)",
+			},
 		},
 	}
 

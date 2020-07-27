@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
+	"github.com/urfave/negroni"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -25,15 +26,20 @@ type Router struct {
 // Handler returns an http.Handler encompassing all endpoint routes
 func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router := mux.NewRouter()
-	tenantRoutes := mux.NewRouter()
+	tenantRoutes := mux.NewRouter().PathPrefix("/api").Subrouter().StrictSlash(true)
 
 	tenantRoutes.HandleFunc("/flags", FlagsHandler)
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
 
-	router.PathPrefix("/api").Handler(middleware.Auth(ctx))
+	router.PathPrefix("/api").Handler(negroni.New(
+		middleware.Auth(),
+		negroni.Wrap(tenantRoutes),
+	))
+
 	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
 
 	router.Use(
+		cors(ctx),
 		middleware.Store(ctx, r.Create, r.Read, r.Evaluate),
 		middleware.Tenant(ctx, tempTenant),
 	)
