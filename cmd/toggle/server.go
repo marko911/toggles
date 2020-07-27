@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/handler"
@@ -52,7 +53,7 @@ func NewServer(c *cli.Context) *Server {
 	read := read.NewService(s)
 	evaluate := evaluate.NewService(s)
 
-	r := handler.Router{Create: create, Read: read, Evaluate: evaluate}
+	r := handler.Router{Create: create, Read: read, Evaluate: evaluate, Authorizer: &auth.Authorizer{}}
 	if err != nil {
 		logrus.Fatal(err)
 		return nil

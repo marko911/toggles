@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/middleware"
@@ -18,9 +19,10 @@ var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7e
 
 // Router contains all endpoints and provides a handler
 type Router struct {
-	Create   create.Service
-	Read     read.Service
-	Evaluate evaluate.Service
+	Create     create.Service
+	Read       read.Service
+	Evaluate   evaluate.Service
+	Authorizer *auth.Authorizer
 }
 
 // Handler returns an http.Handler encompassing all endpoint routes
@@ -32,7 +34,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
 
 	router.PathPrefix("/api").Handler(negroni.New(
-		middleware.Auth(),
+		middleware.Auth(r.Authorizer),
 		negroni.Wrap(tenantRoutes),
 	))
 
@@ -40,7 +42,8 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 
 	router.Use(
 		cors(ctx),
-		middleware.Store(ctx, r.Create, r.Read, r.Evaluate),
+		middleware.Services(ctx, r.Create, r.Read, r.Evaluate),
+		middleware.Authorizer(ctx, r.Authorizer),
 		middleware.Tenant(ctx, tempTenant),
 	)
 
