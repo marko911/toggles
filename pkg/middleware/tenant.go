@@ -3,16 +3,16 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"toggle/server/pkg/models"
+	"toggle/server/pkg/auth"
 
 	"github.com/urfave/cli/v2"
 )
 
-// Tenant binds the current tenant to the context
-func Tenant(ctx *cli.Context, t models.Tenant) func(http.Handler) http.Handler {
+// TenantCache binds the cache reference to the context
+func TenantCache(ctx *cli.Context, c *auth.TenantCache) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = r.WithContext(context.WithValue(r.Context(), models.TenantKey, t)) // session
+			r = r.WithContext(context.WithValue(r.Context(), auth.CacheServiceKey, c))
 			next.ServeHTTP(w, r)
 		})
 	}

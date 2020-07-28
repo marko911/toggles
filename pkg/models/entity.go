@@ -59,5 +59,7 @@ type Attribute struct {
 
 // Tenant is a user of the system
 type Tenant struct {
-	ID bson.ObjectId `json:"id" bson:"_id"`
+	Key    string        `json:"key" bson:"key"`
+	ID     bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	APIKEY string        `json:"apiKey" bson:"apiKey"`
 }

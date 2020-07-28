@@ -12,6 +12,7 @@ import (
 
 // FlagsHandler routes flag requests
 func FlagsHandler(w http.ResponseWriter, r *http.Request) {
+
 	switch r.Method {
 	case "GET":
 		HandleFlagsGet(w, r)
@@ -29,6 +30,7 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 
 // HandleFlagsGet returns all flags from db
 func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
+
 	s := read.FromContext(r.Context())
 	tenant := models.TenantFromContext(r.Context())
 
@@ -46,7 +48,6 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	s := create.FromContext(r.Context())
 	tenant := models.TenantFromContext(r.Context())
-
 	flag := &models.Flag{Tenant: tenant.ID}
 	if err := decodeBody(r, flag); err != nil {
 		respondErr(w, r, http.StatusBadRequest, err)
@@ -54,11 +55,13 @@ func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := flag.Validate(); err != nil {
+
 		respondErr(w, r, http.StatusBadRequest, err)
 
 	}
 
 	if err := s.CreateFlag(flag); err != nil {
+
 		respondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
 		return
 	}

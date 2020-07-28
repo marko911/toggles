@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"fmt"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
@@ -146,4 +147,35 @@ func (s *Store) GetUsers(t models.Tenant) ([]models.User, error) {
 		return users, err
 	}
 	return users, nil
+}
+
+// GetTenant finds the tenant based on key ie an email
+func (s *Store) GetTenant(key string) *models.Tenant {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(s.DBName)
+	var t models.Tenant
+
+	err := d.C("tenants").Find(bson.M{"key": key}).One(&t)
+	if err != nil {
+		return nil
+	}
+	return &t
+}
+
+// InsertTenant adds a tenant to db
+func (s *Store) InsertTenant(t *models.Tenant) error {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(s.DBName)
+	fmt.Println("BEFOORREEEEEEEEEEEEe", t)
+	err := d.C("tenants").Insert(t)
+	if err != nil {
+		logrus.Warning(err)
+		return err
+	}
+
+	return nil
 }

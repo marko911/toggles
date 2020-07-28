@@ -53,7 +53,7 @@ func NewServer(c *cli.Context) *Server {
 	read := read.NewService(s)
 	evaluate := evaluate.NewService(s)
 
-	r := handler.Router{Create: create, Read: read, Evaluate: evaluate, Authorizer: &auth.Authorizer{}}
+	r := handler.Router{Create: create, Read: read, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, TenantCache: auth.GetTenantCache()}
 	if err != nil {
 		logrus.Fatal(err)
 		return nil

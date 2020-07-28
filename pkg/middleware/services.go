@@ -13,6 +13,7 @@ import (
 // Services binds all services to the context
 func Services(ctx *cli.Context, c create.Service, rs read.Service, es evaluate.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
+
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			r = r.WithContext(context.WithValue(r.Context(), create.ServiceKey, c))    // inject create service
 			r = r.WithContext(context.WithValue(r.Context(), read.ServiceKey, rs))     // inject read service

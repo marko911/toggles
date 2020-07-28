@@ -19,22 +19,24 @@ var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7e
 
 // Router contains all endpoints and provides a handler
 type Router struct {
-	Create     create.Service
-	Read       read.Service
-	Evaluate   evaluate.Service
-	Authorizer *auth.Authorizer
+	Create      create.Service
+	Read        read.Service
+	Evaluate    evaluate.Service
+	Authorizer  *auth.Authorizer
+	TenantCache *auth.TenantCache
 }
 
 // Handler returns an http.Handler encompassing all endpoint routes
 func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router := mux.NewRouter()
-	tenantRoutes := mux.NewRouter().PathPrefix("/api").Subrouter().StrictSlash(true)
+	tenantRoutes := mux.NewRouter().PathPrefix("/api").Subrouter()
 
 	tenantRoutes.HandleFunc("/flags", FlagsHandler)
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
 
 	router.PathPrefix("/api").Handler(negroni.New(
-		middleware.Auth(r.Authorizer),
+		negroni.HandlerFunc(r.Authorizer.GetHandler()),
+		negroni.HandlerFunc(auth.TennantMiddleware),
 		negroni.Wrap(tenantRoutes),
 	))
 
@@ -44,7 +46,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 		cors(ctx),
 		middleware.Services(ctx, r.Create, r.Read, r.Evaluate),
 		middleware.Authorizer(ctx, r.Authorizer),
-		middleware.Tenant(ctx, tempTenant),
+		middleware.TenantCache(ctx, r.TenantCache),
 	)
 
 	return router

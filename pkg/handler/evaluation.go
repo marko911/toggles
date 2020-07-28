@@ -16,7 +16,6 @@ import (
 
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
-
 	eval := handleEvalRequest(w, r)
 	if eval == nil {
 		return // error occured and response error was already written to w

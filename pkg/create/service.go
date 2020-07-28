@@ -1,6 +1,7 @@
 package create
 
 import (
+	"toggle/server/pkg/keygen"
 	"toggle/server/pkg/models"
 )
 
@@ -10,6 +11,7 @@ type Service interface {
 	CreateSegment(*models.Segment) error
 	CreateUser(*models.User) error
 	CreateAttributes(*models.User) error
+	CreateTenant(key string) (*models.Tenant, error)
 }
 
 // Repository handles persistance of entity data
@@ -18,6 +20,7 @@ type Repository interface {
 	InsertSegment(*models.Segment) error
 	InsertUser(*models.User) error
 	InsertAttributes([]models.Attribute) error
+	InsertTenant(*models.Tenant) error
 }
 
 type service struct {
@@ -62,4 +65,11 @@ func (s *service) CreateAttributes(u *models.User) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) CreateTenant(key string) (*models.Tenant, error) {
+	t := &models.Tenant{Key: key, APIKEY: keygen.GenerateToken(key)}
+
+	err := s.r.InsertTenant(t)
+	return t, err
 }

@@ -11,6 +11,7 @@ func cors(ctx *cli.Context) func(http.Handler) http.Handler {
 	allowedOrigins := ctx.StringSlice("server-allowed-hosts")
 
 	return func(next http.Handler) http.Handler {
+
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headers := w.Header()
 
@@ -29,7 +30,6 @@ func cors(ctx *cli.Context) func(http.Handler) http.Handler {
 
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusOK)
-
 				return
 			}
 

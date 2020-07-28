@@ -1,12 +1,15 @@
 package read
 
-import "toggle/server/pkg/models"
+import (
+	"toggle/server/pkg/models"
+)
 
 // Service provides read operations
 type Service interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
+	GetTenant(key string) *models.Tenant
 }
 
 // Repository handles fetching persisted entities
@@ -14,6 +17,7 @@ type Repository interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
+	GetTenant(key string) *models.Tenant
 }
 
 type service struct {
@@ -50,4 +54,9 @@ func (s *service) GetUsers(t models.Tenant) ([]models.User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (s *service) GetTenant(key string) *models.Tenant {
+	tenant := s.r.GetTenant(key)
+	return tenant
 }
