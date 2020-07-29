@@ -1,4 +1,4 @@
-version: "3.1"
+version: "3.5"
 services:
   toggle-server:
     container_name: toggle-server
@@ -14,7 +14,6 @@ services:
       - mongo
     env_file:
       - ../.env
-      # - ../.env.local
 
   mongo:
     image: mongo
@@ -31,6 +30,22 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: l30m355i
+  nats:
+    image: nats
+    ports:
+      - "8222:8222"
+    networks: ["nats"]
+  nats-1:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --routes=nats://ruser:{NATS_PASS}@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats"]
+    env_file:
+      - "../.env"
+
+networks:
+  nats:
+    name: nats
   # nsqlookupd:
   #   image: nsqio/nsq
   #   command: /nsqlookupd
