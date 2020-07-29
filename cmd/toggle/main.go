@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -15,6 +16,7 @@ func main() {
 		Action: func(c *cli.Context) error {
 
 			server := NewServer(c)
+
 			server.Start(c)
 
 			return nil
@@ -55,8 +57,19 @@ func main() {
 				Name:    "server-allowed-hosts",
 				Usage:   "server allowed hosts (CORS)",
 			},
+			&cli.StringSliceFlag{
+				EnvVars: []string{"NATS_CLIENT_PASS"},
+				Name:    "nats-client-pass",
+				Usage:   "nats client password token",
+			},
+			&cli.StringSliceFlag{
+				EnvVars: []string{"NATS_SERVER_URL"},
+				Name:    "nats-server-url",
+				Usage:   "nats url",
+			},
 		},
 	}
+	fmt.Println("os args", os.Args)
 
 	err := app.Run(os.Args)
 	if err != nil {

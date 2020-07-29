@@ -10,6 +10,9 @@ services:
       - ../:/toggle/server
     ports:
       - "8080:8080"
+    networks:
+      - nats
+    depends_on: ["nats"]
     links:
       - mongo
     env_file:
@@ -18,18 +21,23 @@ services:
   mongo:
     image: mongo
     restart: always
+    networks:
+      - nats
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: l30m355i
 
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: l30m355i
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   networks:
+  #     - nats
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: l30m355i
+
   nats:
     image: nats
     ports:
@@ -37,38 +45,13 @@ services:
     networks: ["nats"]
   nats-1:
     image: nats
-    command: "--cluster nats://0.0.0.0:6222 --routes=nats://ruser:{NATS_PASS}@nats:6222"
+    command: "--cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
     networks: ["nats"]
     depends_on: ["nats"]
-    env_file:
-      - "../.env"
 
 networks:
   nats:
     name: nats
-  # nsqlookupd:
-  #   image: nsqio/nsq
-  #   command: /nsqlookupd
-  #   ports:
-  #     - "4160"
-  #     - "4161"
-  # nsqd:
-  #   image: nsqio/nsq
-  #   command: /nsqd --lookupd-tcp-address=nsqlookupd:4160 --data-path=/data/nsqd
-  #   depends_on:
-  #     - nsqlookupd
-  #   volumes:
-  #     - /tmp/test:/data/nsqd
-  #   ports:
-  #     - "4150"
-  #     - "4151"
-  # nsqadmin:
-  #   image: nsqio/nsq
-  #   command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
-  #   depends_on:
-  #     - nsqlookupd
-  #   ports:
-  #     - "4171"
   # sc-redis:
   #   container_name: sc-redis
   #   image: redis

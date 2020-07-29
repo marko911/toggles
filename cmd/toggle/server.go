@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
@@ -14,6 +15,7 @@ import (
 	"toggle/server/pkg/read"
 	"toggle/server/pkg/store/mongo"
 
+	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -64,12 +66,23 @@ func NewServer(c *cli.Context) *Server {
 
 //Start the server
 func (s Server) Start(c *cli.Context) {
-	logrus.SetLevel(logrus.InfoLevel)
 
+	logrus.SetLevel(logrus.InfoLevel)
 	addr := c.String("server-address")
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	natsServers := strings.Join(c.StringSlice("nats-server-url"), ",")
+	nc, err := nats.Connect(natsServers)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	// Simple Publisher
+	err = nc.Publish("hello", []byte("Hello asd"))
+	if err != nil {
+		logrus.Fatal("Failed publuish", err)
+	}
 
 	srv := &http.Server{
 		Addr:    addr,
