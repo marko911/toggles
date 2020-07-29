@@ -7,9 +7,10 @@ import (
 )
 
 type mockRead struct {
-	flagsJSON []byte
-	segsPath  *string
-	usersPath *string
+	flagsJSON  []byte
+	tenantJSON []byte
+	segsPath   *string
+	usersPath  *string
 }
 
 func (m *mockRead) GetFlags(models.Tenant) ([]models.Flag, error) {
@@ -40,4 +41,12 @@ func (m *mockRead) GetUsers(models.Tenant) ([]models.User, error) {
 	json.Unmarshal(content, &users)
 
 	return users, nil
+}
+
+func (m *mockRead) GetTenant(key string) *models.Tenant {
+	var t models.Tenant
+
+	json.Unmarshal(m.flagsJSON, &t)
+
+	return &t
 }

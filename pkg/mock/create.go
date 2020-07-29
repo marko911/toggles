@@ -14,7 +14,11 @@ func (m *mockCreate) InsertSegment(*models.Segment) error {
 func (m *mockCreate) InsertUser(*models.User) error {
 	return nil
 }
-func (m *mockCreate) InsertAttributes([]models.Attribute) error {
 
+func (m *mockCreate) InsertAttributes([]models.Attribute) error {
+	return nil
+}
+
+func (m *mockCreate) InsertTenant(t *models.Tenant) error {
 	return nil
 }
