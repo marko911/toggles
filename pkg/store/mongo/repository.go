@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"fmt"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
@@ -170,7 +169,6 @@ func (s *Store) InsertTenant(t *models.Tenant) error {
 	defer sess.Close()
 
 	d := sess.DB(s.DBName)
-	fmt.Println("BEFOORREEEEEEEEEEEEe", t)
 	err := d.C("tenants").Insert(t)
 	if err != nil {
 		logrus.Warning(err)

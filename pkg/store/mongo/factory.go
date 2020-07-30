@@ -3,6 +3,7 @@ package mongo
 import (
 	"time"
 
+	"github.com/prometheus/common/log"
 	"github.com/urfave/cli/v2"
 	mgo "gopkg.in/mgo.v2"
 )
@@ -23,4 +24,23 @@ func NewMongoStore(c *cli.Context) (*Store, error) {
 	session.SetSocketTimeout(3 * time.Second)
 	return &session, nil
 
-} // NewMongoStore returns a new Mongo Session.
+}
+
+// PrepareDB sets up all mongo indexes
+func PrepareDB(session Session) {
+
+	indexes := make(map[string]mgo.Index)
+	indexes["evaluations"] = mgo.Index{
+		Key:        []string{"tenantId", "flagId"},
+		Unique:     true,
+		Background: false,
+	}
+
+	for collectionName, index := range indexes {
+		err := session.DB("toggles").C(collectionName).EnsureIndex(index)
+		if err != nil {
+			panic("Cannot ensure index.")
+		}
+	}
+	log.Info("Prepared database indexes.")
+}

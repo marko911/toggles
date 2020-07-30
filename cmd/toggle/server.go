@@ -51,6 +51,7 @@ func NewServer(c *cli.Context) *Server {
 	}()
 
 	s, err := mongo.NewMongoStore(c)
+	mongo.PrepareDB(s)
 	create := create.NewService(s)
 	read := read.NewService(s)
 	evaluate := evaluate.NewService(s)
@@ -66,6 +67,7 @@ func NewServer(c *cli.Context) *Server {
 
 //Start the server
 func (s Server) Start(c *cli.Context) {
+	defer s.store.Close()
 
 	logrus.SetLevel(logrus.InfoLevel)
 	addr := c.String("server-address")
@@ -98,7 +100,6 @@ func (s Server) Start(c *cli.Context) {
 	<-interrupt
 
 	logrus.Println("Server is shutting down...")
-	s.store.Close()
 	srv.Shutdown(context.Background())
 
 	logrus.Println("Server is shut down")
