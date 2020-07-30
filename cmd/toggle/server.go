@@ -12,6 +12,7 @@ import (
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/handler"
+	"toggle/server/pkg/message"
 	"toggle/server/pkg/read"
 	"toggle/server/pkg/store/mongo"
 
@@ -51,16 +52,21 @@ func NewServer(c *cli.Context) *Server {
 	}()
 
 	s, err := mongo.NewMongoStore(c)
+
+	if err != nil {
+		logrus.Fatal(err)
+		return nil
+	}
+
 	mongo.PrepareDB(s)
 	create := create.NewService(s)
 	read := read.NewService(s)
 	evaluate := evaluate.NewService(s)
 
-	r := handler.Router{Create: create, Read: read, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, TenantCache: auth.GetTenantCache()}
-	if err != nil {
-		logrus.Fatal(err)
-		return nil
-	}
+	natsClient := message.NewNatsClient(c)
+	messenger := message.NewNatsService(natsClient)
+
+	r := handler.Router{Create: create, Read: read, Message: messenger, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, TenantCache: auth.GetTenantCache()}
 
 	return &Server{r, s}
 }
@@ -85,6 +91,9 @@ func (s Server) Start(c *cli.Context) {
 	if err != nil {
 		logrus.Fatal("Failed publuish", err)
 	}
+	nc.Subscribe("request", func(m *nats.Msg) {
+		m.Respond([]byte("answer is 42"))
+	})
 
 	srv := &http.Server{
 		Addr:    addr,

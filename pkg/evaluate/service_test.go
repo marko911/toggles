@@ -16,7 +16,7 @@ type fields struct {
 	r Repository
 }
 type args struct {
-	e EvaluationData
+	e EvaluationRequest
 }
 
 type testCase struct {
@@ -80,7 +80,7 @@ func Test_service_Evaluate(t *testing.T) {
 		{
 			"flag with user targeting",
 			fields{r: &mock.EvaluateByte{Flag: userTarget}},
-			args{EvaluationData{"hey-ladies", user{Key: "jenny@hey.com"}}},
+			args{EvaluationRequest{"hey-ladies", user{Key: "jenny@hey.com"}}},
 			&EvaluationResult{
 				models.User{Key: "jenny@hey.com"},
 				&models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
@@ -91,7 +91,7 @@ func Test_service_Evaluate(t *testing.T) {
 		{
 			"flag default target Red variation",
 			fields{r: &mock.EvaluateByte{Flag: defaultTargetFlag}},
-			args{EvaluationData{"hey-ladies", map[string]interface{}{
+			args{EvaluationRequest{"hey-ladies", map[string]interface{}{
 				"key": "jenny@hey.com",
 				"attributes": map[string]interface{}{
 					"groups": []string{"ladies"},
@@ -228,7 +228,7 @@ func TestMatchingDistributions(t *testing.T) {
 					"attributes": tt.attributes,
 				}
 
-				e := EvaluationData{"alpha-users", u}
+				e := EvaluationRequest{"alpha-users", u}
 
 				got, err := s.Evaluate(e)
 

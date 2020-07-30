@@ -26,7 +26,7 @@ func GenerateTarget(a, o, v string) []models.Target {
 	return r
 }
 
-func TestEvaluationData_MatchFlagTarget(t *testing.T) {
+func TestEvaluationRequest_MatchFlagTarget(t *testing.T) {
 	type fields struct {
 		FlagKey string
 		User    interface{}
@@ -161,14 +161,14 @@ func TestEvaluationData_MatchFlagTarget(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			e := &EvaluationData{
+			e := &EvaluationRequest{
 				FlagKey: tt.fields.FlagKey,
 				User:    tt.fields.User,
 			}
 			got, err := e.MatchFlagTarget(tt.args.targets)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("EvaluationData.MatchFlagTarget() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("EvaluationRequest.MatchFlagTarget() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			diff := cmp.Diff(tt.want, got)

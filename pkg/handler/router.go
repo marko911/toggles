@@ -5,6 +5,7 @@ import (
 	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/evaluate"
+	"toggle/server/pkg/message"
 	"toggle/server/pkg/middleware"
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
@@ -22,6 +23,7 @@ type Router struct {
 	Create      create.Service
 	Read        read.Service
 	Evaluate    evaluate.Service
+	Message     message.Service
 	Authorizer  *auth.Authorizer
 	TenantCache *auth.TenantCache
 }
@@ -44,7 +46,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 
 	router.Use(
 		cors(ctx),
-		middleware.Services(ctx, r.Create, r.Read, r.Evaluate),
+		middleware.Services(ctx, r.Create, r.Read, r.Evaluate, r.Message),
 		middleware.Authorizer(ctx, r.Authorizer),
 		middleware.TenantCache(ctx, r.TenantCache),
 	)

@@ -74,8 +74,8 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.EvaluationData {
-	var e evaluate.EvaluationData
+func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.EvaluationRequest {
+	var e evaluate.EvaluationRequest
 
 	if err := decodeBody(r, &e); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)

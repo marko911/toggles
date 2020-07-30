@@ -24,7 +24,7 @@ const percentMultiplier float64 = 100
 
 // MatchFlagTarget parses all flag rules returning a variation if
 // user matches
-func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Variation, error) {
+func (e *EvaluationRequest) MatchFlagTarget(targets []models.Target) (*models.Variation, error) {
 
 	for _, target := range targets {
 
@@ -86,7 +86,7 @@ func (e *EvaluationData) MatchFlagTarget(targets []models.Target) (*models.Varia
 }
 
 // MatchDefaultVariations returns the default variation for this user
-func (e *EvaluationData) MatchDefaultVariations(f *models.Flag) (*models.Variation, error) {
+func (e *EvaluationRequest) MatchDefaultVariations(f *models.Flag) (*models.Variation, error) {
 	var u user
 	err := mapstructure.Decode(e.User, &u)
 	if err != nil {

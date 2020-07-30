@@ -9,14 +9,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// EvaluationRequest represents an a client request on a flag key
+// EvaluationRequest wraps User into interface for passing to evaluation library
 type EvaluationRequest struct {
-	FlagKey string      `json:"flagKey"`
-	User    models.User `json:"user"`
-}
-
-// EvaluationData wraps User into interface for passing to evaluation library
-type EvaluationData struct {
 	FlagKey string
 	User    interface{}
 }
@@ -31,7 +25,7 @@ type EvaluationResult struct {
 
 // Service runs evaluation operations on client feature flag requests
 type Service interface {
-	Evaluate(e EvaluationData) (*EvaluationResult, error)
+	Evaluate(e EvaluationRequest) (*EvaluationResult, error)
 }
 
 // Repository holds all persisted data related to flags, users, attributes, segments
@@ -49,7 +43,7 @@ func NewService(r Repository) Service {
 }
 
 // Evaluate processes a client request and returns the variation to show to user
-func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
+func (s *service) Evaluate(e EvaluationRequest) (*EvaluationResult, error) {
 
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
@@ -87,7 +81,7 @@ func (s *service) Evaluate(e EvaluationData) (*EvaluationResult, error) {
 
 // VariationFromUserTargeting checks to see if user has been specifically targeted
 // in a flag configuration and returns the varition if true
-func (e *EvaluationData) VariationFromUserTargeting(f *models.Flag, u *models.User) *models.Variation {
+func (e *EvaluationRequest) VariationFromUserTargeting(f *models.Flag, u *models.User) *models.Variation {
 	for _, variation := range f.Variations {
 		if len(variation.UserKeys) > 0 {
 			for _, key := range variation.UserKeys {
