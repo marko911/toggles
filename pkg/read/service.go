@@ -1,6 +1,7 @@
 package read
 
 import (
+	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/models"
 )
 
@@ -11,6 +12,7 @@ type Service interface {
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
+	GetEvals() ([]evaluate.Evaluation, error)
 }
 
 // Repository handles fetching persisted entities
@@ -20,6 +22,7 @@ type Repository interface {
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
+	GetEvals() ([]evaluate.Evaluation, error)
 }
 
 type service struct {
@@ -69,4 +72,12 @@ func (s *service) GetFlag(key string) (*models.Flag, error) {
 		return nil, err
 	}
 	return flag, nil
+}
+
+func (s *service) GetEvals() ([]evaluate.Evaluation, error) {
+	evals, err := s.r.GetEvals()
+	if err != nil {
+		return nil, err
+	}
+	return evals, nil
 }

@@ -1,6 +1,7 @@
 package create
 
 import (
+	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/keygen"
 	"toggle/server/pkg/models"
 )
@@ -12,6 +13,7 @@ type Service interface {
 	CreateUser(*models.User) error
 	CreateAttributes(*models.User) error
 	CreateTenant(key string) (*models.Tenant, error)
+	CreateEvaluation(*evaluate.Evaluation) error
 }
 
 // Repository handles persistance of entity data
@@ -21,6 +23,7 @@ type Repository interface {
 	InsertUser(*models.User) error
 	InsertAttributes([]models.Attribute) error
 	InsertTenant(*models.Tenant) error
+	InsertEvaluation(*evaluate.Evaluation) error
 }
 
 type service struct {
@@ -72,4 +75,8 @@ func (s *service) CreateTenant(key string) (*models.Tenant, error) {
 
 	err := s.r.InsertTenant(t)
 	return t, err
+}
+
+func (s *service) CreateEvaluation(e *evaluate.Evaluation) error {
+	return s.r.InsertEvaluation(e)
 }

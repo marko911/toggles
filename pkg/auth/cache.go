@@ -1,12 +1,11 @@
 package auth
 
 import (
-	"context"
 	"sync"
 	"time"
 	"toggle/server/pkg/read"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -30,7 +29,7 @@ var GetCache = func() *Cache {
 		ec := &Cache{
 			tenants:         make(map[string]bson.ObjectId),
 			evals:           make(map[bson.ObjectId]int),
-			refreshInterval: time.Second * 3,
+			refreshInterval: time.Second * 1,
 		}
 		cache = ec
 	})
@@ -59,11 +58,12 @@ func (cache *Cache) GetEvalCount(flagID bson.ObjectId) int {
 	return 0
 }
 
-//
+//StartPollingEvals polls db for evals and loads them into cache
 func (cache *Cache) StartPollingEvals(s read.Service) {
+	logrus.Print("Starting cache polling")
 	go func() {
 		for range time.Tick(cache.refreshInterval) {
-			err := ec.reloadMapCache()
+			err := cache.reloadMapCache(s)
 			if err != nil {
 				logrus.WithField("err", err).Error("reload evaluation cache error")
 			}
@@ -71,12 +71,20 @@ func (cache *Cache) StartPollingEvals(s read.Service) {
 	}()
 }
 
-type serviceKey string
+func (cache *Cache) reloadMapCache(s read.Service) error {
+	evals, err := s.GetEvals()
+	if err != nil {
+		return err
+	}
+	evalCacheMap := make(map[bson.ObjectId]int)
 
-//CacheServiceKey is context key for tenantCache
-const CacheServiceKey serviceKey = "tenantCache"
+	for _, eval := range evals {
+		evalCacheMap[eval.FlagID] = eval.Count
+	}
 
-// CacheFromContext returns the create service from context
-func CacheFromContext(c context.Context) *Cache {
-	return c.Value(CacheServiceKey).(*Cache)
+	cache.mapCacheLock.RLock()
+	defer cache.mapCacheLock.RUnlock()
+
+	cache.evals = evalCacheMap
+	return nil
 }

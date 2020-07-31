@@ -9,10 +9,13 @@ type Subscription interface {
 	Unsubscribe() error
 }
 
+// Handler is a generic subscription callback
+type Handler interface{}
+
 // Service is a messaging service
 type Service interface {
 	Publish(subj string, v interface{}) error
-	Subscribe(subj string, cb func(m interface{})) Subscription
+	Subscribe(subj string, cb Handler) Subscription
 	// ChanSubscribe(subj string, c chan Msg) error
 }
 
@@ -42,10 +45,8 @@ func (s *natsService) Publish(subj string, data interface{}) error {
 	return err
 }
 
-func (s *natsService) Subscribe(subj string, cb func(m interface{})) Subscription {
-	sub, _ := s.c.Subscribe(subj, func(m *nats.Msg) {
-		cb(m)
-	})
+func (s *natsService) Subscribe(subj string, cb Handler) Subscription {
+	sub, _ := s.c.Subscribe(subj, cb)
 	return sub
 }
 

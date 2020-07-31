@@ -58,15 +58,21 @@ func NewServer(c *cli.Context) *Server {
 		return nil
 	}
 
+	// db services
 	mongo.PrepareDB(s)
 	create := create.NewService(s)
 	read := read.NewService(s)
 	evaluate := evaluate.NewService(s)
 
+	// messaging service init
 	natsClient := message.NewNatsClient(c)
-	// conn, _ := nats.NewEncodedConn(natsClient, nats.JSON_ENCODER)
 	messenger := message.NewNatsService(natsClient)
+
+	message.StartEvalEventsReceiever(create, messenger)
+
+	// cache polling init
 	cache := auth.GetCache()
+	cache.StartPollingEvals(read)
 	r := handler.Router{Create: create, Read: read, Message: messenger, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, Cache: cache}
 
 	return &Server{r, s}
@@ -82,16 +88,13 @@ func (s Server) Start(c *cli.Context) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	natsServers := strings.Join(c.StringSlice("nats-server-url"), ",")
+
 	nc, err := nats.Connect(natsServers)
+
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	// Simple Publisher
-	err = nc.Publish("hello", []byte("Hello asd"))
-	if err != nil {
-		logrus.Fatal("Failed publuish", err)
-	}
 	nc.Subscribe("request", func(m *nats.Msg) {
 		m.Respond([]byte("answer is 42"))
 	})

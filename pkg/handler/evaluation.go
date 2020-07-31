@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"toggle/server/pkg/auth"
@@ -76,20 +77,18 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var v *evaluate.EvaluationResult
+	var v *evaluate.Evaluation
 
-	if flag.HasLimit() {
-		cache := auth.CacheFromContext(r.Context())
-		if cache.GetEvalCount(flag.ID) > flag.Limit {
-
-		}
-		// check limit, return
+	cache := auth.CacheFromContext(r.Context())
+	if cache.GetEvalCount(flag.ID) > flag.Limit {
+		fmt.Println("LIMIT REACHED-----------------------------Returning default")
 		v, err = s.MatchDefault(*eval)
 		if err != nil {
 			logrus.Error(err)
 			respondErr(w, r, http.StatusBadRequest, err)
 			return
 		}
+
 	} else {
 		v, err = s.Evaluate(*eval)
 		if err != nil {

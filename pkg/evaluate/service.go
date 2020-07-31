@@ -15,18 +15,19 @@ type EvaluationRequest struct {
 	User    interface{}
 }
 
-// EvaluationResult determines what variation user is shown, can be simple true or false
+// Evaluation determines what variation user is shown, can be simple true or false
 // or a specific variation of flag being evaluated
-type EvaluationResult struct {
-	User      models.User
-	Variation *models.Variation
-	FlagID    bson.ObjectId `json:"flagId"`
+type Evaluation struct {
+	User      models.User       `json:"user" bson:"user"`
+	Variation *models.Variation `json:"variation" bson:"variation"`
+	FlagID    bson.ObjectId     `json:"flagId" bson:"flagId"`
+	Count     int               `json:"count,omitempty" bson:"count"`
 }
 
 // Service runs evaluation operations on client feature flag requests
 type Service interface {
-	Evaluate(e EvaluationRequest) (*EvaluationResult, error)
-	MatchDefault(e EvaluationRequest) (*EvaluationResult, error)
+	Evaluate(e EvaluationRequest) (*Evaluation, error)
+	MatchDefault(e EvaluationRequest) (*Evaluation, error)
 }
 
 // Repository holds all persisted data related to flags, users, attributes, segments
@@ -44,7 +45,7 @@ func NewService(r Repository) Service {
 }
 
 // Evaluate processes a client request and returns the variation to show to user
-func (s *service) Evaluate(e EvaluationRequest) (*EvaluationResult, error) {
+func (s *service) Evaluate(e EvaluationRequest) (*Evaluation, error) {
 
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
@@ -59,28 +60,29 @@ func (s *service) Evaluate(e EvaluationRequest) (*EvaluationResult, error) {
 	}
 
 	if v := e.VariationFromUserTargeting(flag, &u); v != nil {
-		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+		return &Evaluation{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
 	if v, err := e.MatchFlagTarget(flag.Targets); v != nil {
 		if err != nil {
 			return nil, err
 		}
-		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+		return &Evaluation{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
 	if v, err := e.MatchDefaultVariations(flag); v != nil {
 		if err != nil {
 			return nil, err
 		}
-		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+		return &Evaluation{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
 	return nil, errors.ErrVariationNotFound
 
 }
 
-func (s *service) MatchDefault(e EvaluationRequest) (*EvaluationResult, error) {
+// MatchDefault matches default variation, copying from above until later
+func (s *service) MatchDefault(e EvaluationRequest) (*Evaluation, error) {
 	flag, err := s.r.GetFlag(e.FlagKey)
 	if err != nil {
 		logrus.Error("Could not get flag with key: ", e.FlagKey)
@@ -96,7 +98,7 @@ func (s *service) MatchDefault(e EvaluationRequest) (*EvaluationResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+		return &Evaluation{User: u, Variation: v, FlagID: flag.ID}, nil
 	}
 
 	return nil, errors.ErrVariationNotFound
