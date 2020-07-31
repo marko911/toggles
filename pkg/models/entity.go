@@ -11,6 +11,7 @@ type Flag struct {
 	Variations []Variation   `json:"variations" bson:"variations"`
 	Targets    []Target      `json:"targets,omitempty" bson:"targets,omitempty"`
 	Tenant     bson.ObjectId `json:"tenant" bson:"tenant"`
+	Limit      int           `json:"limit,omitempty" bson:"limit,omitempty"`
 }
 
 // Rule is a constraint placed on users being evaluated
@@ -47,14 +48,14 @@ type User struct {
 	Name       string                 `json:"name,omitempty" bson:"name,omitempty"`
 	IP         string                 `json:"ip,omitempty" bson:"ip,omitempty"`
 	Attributes map[string]interface{} `json:"attributes,omitempty" bson:"attributes,omitempty"`
-	Tenant     bson.ObjectId          `json:"tenant,omitempty" bson:"tenant"`
+	Tenant     bson.ObjectId          `json:"tenant,omitempty" bson:"tenant,omitempty"`
 }
 
 //Attribute represents a custom user attribute ie. a user group, age, gender
 type Attribute struct {
-	ID     bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Name   string        `json:"name" bson:"name"`
-	Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant"`
+	ID   bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Name string        `json:"name" bson:"name"`
+	// Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant"`
 }
 
 // Tenant is a user of the system

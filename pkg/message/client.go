@@ -9,11 +9,12 @@ import (
 )
 
 // NewNatsClient returns a nats client connection
-func NewNatsClient(c *cli.Context) *nats.Conn {
+func NewNatsClient(c *cli.Context) *nats.EncodedConn {
 	natsServers := strings.Join(c.StringSlice("nats-server-url"), ",")
 	nc, err := nats.Connect(natsServers)
+	conn, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	return nc
+	return conn
 }

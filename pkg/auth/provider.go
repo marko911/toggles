@@ -55,7 +55,7 @@ func TennantMiddleware(w http.ResponseWriter, r *http.Request, next http.Handler
 	if err != nil {
 		fmt.Println("NO TOKEN zzzzzzzzzzzzzzzzz")
 	}
-	c := GetTenantCache()
+	c := GetCache()
 	tenantID := c.GetByAuthToken(token)
 
 	t := &models.Tenant{}

@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"fmt"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
@@ -43,13 +44,11 @@ func (s *Store) InsertSegment(seg *models.Segment) error {
 func (s *Store) InsertUser(u *models.User) error {
 	sess := s.Copy()
 	defer sess.Close()
-
 	d := sess.DB(s.DBName)
 	info, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
-
 	if err != nil {
-		logrus.Warning(err)
-		return err
+		insertErr := d.C("users").Insert(u)
+		return insertErr
 	}
 	logrus.Println("info", info.UpsertedId)
 	return nil
@@ -79,7 +78,9 @@ func (s *Store) InsertAttributes(a []models.Attribute) error {
 	for _, attr := range a {
 		_, err := d.C("attributes").Upsert(bson.M{"name": attr.Name}, attr)
 		if err != nil {
-			return err
+			newErr := d.C("attributes").Insert(&attr)
+			fmt.Println("NEW WERRRR", newErr)
+			return newErr
 		}
 	}
 	return nil

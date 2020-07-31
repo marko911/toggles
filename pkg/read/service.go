@@ -7,6 +7,7 @@ import (
 // Service provides read operations
 type Service interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
+	GetFlag(key string) (*models.Flag, error)
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
@@ -15,6 +16,7 @@ type Service interface {
 // Repository handles fetching persisted entities
 type Repository interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
+	GetFlag(key string) (*models.Flag, error)
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
@@ -59,4 +61,12 @@ func (s *service) GetUsers(t models.Tenant) ([]models.User, error) {
 func (s *service) GetTenant(key string) *models.Tenant {
 	tenant := s.r.GetTenant(key)
 	return tenant
+}
+
+func (s *service) GetFlag(key string) (*models.Flag, error) {
+	flag, err := s.r.GetFlag(key)
+	if err != nil {
+		return nil, err
+	}
+	return flag, nil
 }

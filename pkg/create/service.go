@@ -54,8 +54,8 @@ func (s *service) CreateAttributes(u *models.User) error {
 	var attrs []models.Attribute
 	for attribute := range u.Attributes {
 		a := models.Attribute{
-			Name:   attribute,
-			Tenant: u.Tenant,
+			Name: attribute,
+			// Tenant: u.Tenant, //TODO: fix this
 		}
 		attrs = append(attrs, a)
 	}

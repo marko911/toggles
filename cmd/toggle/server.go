@@ -64,9 +64,10 @@ func NewServer(c *cli.Context) *Server {
 	evaluate := evaluate.NewService(s)
 
 	natsClient := message.NewNatsClient(c)
+	// conn, _ := nats.NewEncodedConn(natsClient, nats.JSON_ENCODER)
 	messenger := message.NewNatsService(natsClient)
-
-	r := handler.Router{Create: create, Read: read, Message: messenger, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, TenantCache: auth.GetTenantCache()}
+	cache := auth.GetCache()
+	r := handler.Router{Create: create, Read: read, Message: messenger, Evaluate: evaluate, Authorizer: &auth.Authorizer{}, Cache: cache}
 
 	return &Server{r, s}
 }

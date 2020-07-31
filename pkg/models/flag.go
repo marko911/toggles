@@ -15,3 +15,8 @@ func (f *Flag) Validate() (bool, error) {
 	return true, nil
 
 }
+
+// HasLimit tells us if flag has a limit of number of evaluations
+func (f *Flag) HasLimit() bool {
+	return f.Limit > 0
+}

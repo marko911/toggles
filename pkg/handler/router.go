@@ -20,12 +20,12 @@ var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7e
 
 // Router contains all endpoints and provides a handler
 type Router struct {
-	Create      create.Service
-	Read        read.Service
-	Evaluate    evaluate.Service
-	Message     message.Service
-	Authorizer  *auth.Authorizer
-	TenantCache *auth.TenantCache
+	Create     create.Service
+	Read       read.Service
+	Evaluate   evaluate.Service
+	Message    message.Service
+	Authorizer *auth.Authorizer
+	Cache      *auth.Cache
 }
 
 // Handler returns an http.Handler encompassing all endpoint routes
@@ -48,7 +48,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 		cors(ctx),
 		middleware.Services(ctx, r.Create, r.Read, r.Evaluate, r.Message),
 		middleware.Authorizer(ctx, r.Authorizer),
-		middleware.TenantCache(ctx, r.TenantCache),
+		middleware.TenantCache(ctx, r.Cache),
 	)
 
 	return router

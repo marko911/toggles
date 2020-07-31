@@ -26,6 +26,7 @@ type EvaluationResult struct {
 // Service runs evaluation operations on client feature flag requests
 type Service interface {
 	Evaluate(e EvaluationRequest) (*EvaluationResult, error)
+	MatchDefault(e EvaluationRequest) (*EvaluationResult, error)
 }
 
 // Repository holds all persisted data related to flags, users, attributes, segments
@@ -77,6 +78,28 @@ func (s *service) Evaluate(e EvaluationRequest) (*EvaluationResult, error) {
 
 	return nil, errors.ErrVariationNotFound
 
+}
+
+func (s *service) MatchDefault(e EvaluationRequest) (*EvaluationResult, error) {
+	flag, err := s.r.GetFlag(e.FlagKey)
+	if err != nil {
+		logrus.Error("Could not get flag with key: ", e.FlagKey)
+		return nil, err
+	}
+	var u models.User
+	err = mapstructure.Decode(e.User, &u)
+	if err != nil {
+		return nil, errors.ErrCantCastUser
+	}
+
+	if v, err := e.MatchDefaultVariations(flag); v != nil {
+		if err != nil {
+			return nil, err
+		}
+		return &EvaluationResult{User: u, Variation: v, FlagID: flag.ID}, nil
+	}
+
+	return nil, errors.ErrVariationNotFound
 }
 
 // VariationFromUserTargeting checks to see if user has been specifically targeted

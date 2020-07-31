@@ -28,12 +28,15 @@ func NewMongoStore(c *cli.Context) (*Store, error) {
 
 // PrepareDB sets up all mongo indexes
 func PrepareDB(session Session) {
-
 	indexes := make(map[string]mgo.Index)
 	indexes["evaluations"] = mgo.Index{
 		Key:        []string{"tenantId", "flagId"},
 		Unique:     true,
 		Background: false,
+	}
+	indexes["flags"] = mgo.Index{
+		Key:    []string{"tenant", "key"},
+		Unique: true,
 	}
 
 	for collectionName, index := range indexes {
