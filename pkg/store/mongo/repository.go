@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"fmt"
-	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
@@ -42,7 +41,7 @@ func (s *Store) InsertSegment(seg *models.Segment) error {
 }
 
 // InsertEvaluation adds an evaluation record to mongo
-func (s *Store) InsertEvaluation(e *evaluate.Evaluation) error {
+func (s *Store) InsertEvaluation(e *models.Evaluation) error {
 	sess := s.Copy()
 	defer sess.Close()
 	d := sess.DB(s.DBName)
@@ -196,12 +195,12 @@ func (s *Store) InsertTenant(t *models.Tenant) error {
 }
 
 // GetEvals returns all evaluations from db
-func (s *Store) GetEvals() ([]evaluate.Evaluation, error) {
+func (s *Store) GetEvals() ([]models.Evaluation, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
 	d := sess.DB(s.DBName)
-	var evals []evaluate.Evaluation
+	var evals []models.Evaluation
 	err := d.C("evaluations").Find(nil).All(&evals)
 
 	return evals, err

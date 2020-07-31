@@ -22,3 +22,7 @@ func (m *mockCreate) InsertAttributes([]models.Attribute) error {
 func (m *mockCreate) InsertTenant(t *models.Tenant) error {
 	return nil
 }
+
+func (m *mockCreate) InsertEvaluation(e *models.Evaluation) error {
+	return nil
+}

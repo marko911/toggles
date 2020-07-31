@@ -77,7 +77,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var v *evaluate.Evaluation
+	var v *models.Evaluation
 
 	cache := auth.CacheFromContext(r.Context())
 	if cache.GetEvalCount(flag.ID) > flag.Limit {

@@ -23,7 +23,7 @@ type testCase struct {
 	name    string
 	fields  fields
 	args    args
-	want    *Evaluation
+	want    *models.Evaluation
 	wantErr bool
 }
 
@@ -81,10 +81,11 @@ func Test_service_Evaluate(t *testing.T) {
 			"flag with user targeting",
 			fields{r: &mock.EvaluateByte{Flag: userTarget}},
 			args{EvaluationRequest{"hey-ladies", user{Key: "jenny@hey.com"}}},
-			&Evaluation{
+			&models.Evaluation{
 				models.User{Key: "jenny@hey.com"},
 				&models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
 				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
+				0,
 			},
 			false,
 		},
@@ -97,12 +98,13 @@ func Test_service_Evaluate(t *testing.T) {
 					"groups": []string{"ladies"},
 				},
 			}}},
-			&Evaluation{
+			&models.Evaluation{
 				models.User{Key: "jenny@hey.com", Attributes: map[string]interface{}{
 					"groups": []string{"ladies"},
 				}},
 				&models.Variation{Name: "Red", Percent: 100},
 				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
+				0,
 			},
 			false,
 		},

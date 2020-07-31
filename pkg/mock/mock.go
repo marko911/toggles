@@ -3,6 +3,7 @@ package mock
 import (
 	"context"
 	"testing"
+	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/read"
 	"toggle/server/pkg/store/mongo"
@@ -15,6 +16,7 @@ func CreateContext(t *testing.T, f ...func(c context.Context) context.Context) c
 	ctx = initCreateService(ctx)
 	ctx = initReadService(ctx)
 	ctx = initDatabaseMemoryStore(ctx)
+	ctx = initCache(ctx)
 
 	for idx := range f {
 		ctx = f[idx](ctx)
@@ -74,4 +76,9 @@ func initReadService(c context.Context) context.Context {
 func initCreateService(c context.Context) context.Context {
 	mockCreateService := create.NewService(&mockCreate{})
 	return context.WithValue(c, create.ServiceKey, mockCreateService)
+}
+
+func initCache(c context.Context) context.Context {
+	cache := auth.GetCache()
+	return context.WithValue(c, auth.CacheServiceKey, cache)
 }
