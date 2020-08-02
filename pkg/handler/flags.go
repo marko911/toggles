@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/errors"
@@ -33,11 +34,11 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 
 	s := read.FromContext(r.Context())
 	tenant := models.TenantFromContext(r.Context())
-
+	fmt.Println("tenanttttt", tenant)
 	c, err := s.GetFlags(tenant)
 	if err != nil {
 		logrus.Error("Getting flags failed: ", err)
-		respondHTTPErr(w, r, http.StatusBadRequest)
+		respondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
 	respond(w, r, http.StatusOK, c)
@@ -55,16 +56,15 @@ func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := flag.Validate(); err != nil {
-
 		respondErr(w, r, http.StatusBadRequest, err)
-
+		return
 	}
 
 	if err := s.CreateFlag(flag); err != nil {
-
 		respondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
 		return
 	}
+
 	respond(w, r, http.StatusCreated, errors.SuccessFlagCreated)
 
 }

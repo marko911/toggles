@@ -4,12 +4,19 @@ import "toggle/server/pkg/errors"
 
 // Validate validates a flag payload from POST request
 func (f *Flag) Validate() (bool, error) {
-	if f.Key == "" || f.Name == "" || len(f.Variations) == 0 {
-		return false, errors.ErrJSONPayloadInvalidFlag
+	if f.Key == "" {
+		return false, errors.ErrJSONPayloadInvalidFlagKey
+	}
+
+	if f.Name == "" {
+		return false, errors.ErrJSONPayloadInvalidName
+	}
+	if len(f.Variations) == 0 {
+		return false, errors.ErrJSONPayloadInvalidVariations
 	}
 	for _, variation := range f.Variations {
 		if variation.Name == "" {
-			return false, errors.ErrJSONPayloadInvalidFlag
+			return false, errors.ErrJSONPayloadInvalidVariationEmpty
 		}
 	}
 	return true, nil

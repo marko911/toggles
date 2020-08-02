@@ -13,11 +13,20 @@ var (
 	// ErrJSONPayloadInvalidFormat is returned when the JSON payload is invalid
 	ErrJSONPayloadInvalidFormat = errors.New("Invalid JSON format")
 
-	//ErrJSONPayloadInvalidFlag is returned when the flag sent is in bad format
-	ErrJSONPayloadInvalidFlag = errors.New("Invalid JSON flag format")
+	//ErrJSONPayloadInvalidFlagKey is returned when the flag sent is in bad format
+	ErrJSONPayloadInvalidFlagKey = errors.New("invalid flag, key required")
 
 	//ErrFailedCreateFlag is returned when flag creation fails
 	ErrFailedCreateFlag = errors.New("Error creating flag")
+
+	//ErrJSONPayloadInvalidVariations returns when flag has no variations
+	ErrJSONPayloadInvalidVariations = errors.New("invalid flag, variations required")
+
+	//ErrJSONPayloadInvalidVariationEmpty returns when variations of flag are incomplete
+	ErrJSONPayloadInvalidVariationEmpty = errors.New("invalid flag, variations incomplete")
+
+	//ErrJSONPayloadInvalidName returns when flag has no name defined
+	ErrJSONPayloadInvalidName = errors.New("invalid flag, name required")
 
 	//ErrEvalRequestMissingFlag is returned when eval request has no flag id
 	ErrEvalRequestMissingFlag = errors.New("FlagID is required")
