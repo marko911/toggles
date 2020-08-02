@@ -106,10 +106,6 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// check flag limit first
 
-	// messenger := message.FromContext(r.Context())
-
-	// messenger.Publish("evaluations", v)
-
 	respond(w, r, http.StatusCreated, v)
 
 }
