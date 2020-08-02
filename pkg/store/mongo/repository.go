@@ -179,6 +179,21 @@ func (s *Store) GetTenant(key string) *models.Tenant {
 	return &t
 }
 
+// GetTenantFromAPIKey gets the tenant from apiKey / client key
+func (s *Store) GetTenantFromAPIKey(apiKey string) *models.Tenant {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(s.DBName)
+	var t models.Tenant
+
+	err := d.C("tenants").Find(bson.M{"apiKey": apiKey}).One(&t)
+	if err != nil {
+		return nil
+	}
+	return &t
+}
+
 // InsertTenant adds a tenant to db
 func (s *Store) InsertTenant(t *models.Tenant) error {
 	sess := s.Copy()

@@ -12,6 +12,7 @@ type Service interface {
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
+	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 
 // Repository handles fetching persisted entities
@@ -22,6 +23,7 @@ type Repository interface {
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
+	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 
 type service struct {
@@ -63,6 +65,10 @@ func (s *service) GetUsers(t models.Tenant) ([]models.User, error) {
 func (s *service) GetTenant(key string) *models.Tenant {
 	tenant := s.r.GetTenant(key)
 	return tenant
+}
+
+func (s *service) GetTenantFromAPIKey(apiKey string) *models.Tenant {
+	return s.r.GetTenantFromAPIKey(apiKey)
 }
 
 func (s *service) GetFlag(key string) (*models.Flag, error) {

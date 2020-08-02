@@ -12,6 +12,7 @@ import (
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
+	"github.com/gorilla/mux"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 )
@@ -20,16 +21,30 @@ import (
 
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clientKey := vars["clientKey"]
+
+	read := read.FromContext(r.Context())
+
+	// get tenant user for request
+	tenant := read.GetTenantFromAPIKey(clientKey)
+	if tenant == nil {
+		respondErr(w, r, http.StatusNotFound, "invalid client key")
+		return
+	}
+
+	// cast request body into evaluation data
 	eval := handleEvalRequest(w, r)
 	if eval == nil {
 		return // error occured and response error was already written to w
 	}
+
 	createService := create.FromContext(r.Context())
-	// tenant := models.TenantFromContext(r.Context())
-	// u, _ := eval.User.(models.User)
+
 	var u models.User
 	err := mapstructure.Decode(eval.User, &u)
-	// u.Tenant = tenant.ID
+	u.Tenant = tenant.ID
+
 	errc := make(chan error, 1)
 	var wg sync.WaitGroup
 
@@ -69,8 +84,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	s := evaluate.FromContext(r.Context())
 
 	// check flag limit first
-	readService := read.FromContext(r.Context())
-	flag, err := readService.GetFlag(eval.FlagKey)
+	flag, err := read.GetFlag(eval.FlagKey)
 
 	if err != nil {
 		respondErr(w, r, http.StatusBadRequest, err)
@@ -79,8 +93,10 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	var v *models.Evaluation
 
+	// TODO: invalidate cache when flag data changes
 	cache := auth.CacheFromContext(r.Context())
-	if cache.GetEvalCount(flag.ID) > flag.Limit {
+
+	if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
 		fmt.Println("LIMIT REACHED-----------------------------Returning default")
 		v, err = s.MatchDefault(*eval)
 		if err != nil {

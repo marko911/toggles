@@ -42,13 +42,13 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 		negroni.Wrap(tenantRoutes),
 	))
 
-	router.HandleFunc("/evaluate", EvaluationHandler).Methods("POST")
+	router.HandleFunc("/evaluate/{clientKey}", EvaluationHandler).Methods("POST")
 
 	router.Use(
 		cors(ctx),
 		middleware.Services(ctx, r.Create, r.Read, r.Evaluate, r.Message),
 		middleware.Authorizer(ctx, r.Authorizer),
-		middleware.TenantCache(ctx, r.Cache),
+		middleware.Cache(ctx, r.Cache),
 	)
 
 	return router
