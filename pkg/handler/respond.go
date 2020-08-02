@@ -32,7 +32,7 @@ func respond(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func respondErr(w http.ResponseWriter, r *http.Request,
+func RespondErr(w http.ResponseWriter, r *http.Request,
 	status int, args ...interface{},
 ) {
 	respond(w, r, status, map[string]interface{}{
@@ -45,5 +45,5 @@ func respondErr(w http.ResponseWriter, r *http.Request,
 func respondHTTPErr(w http.ResponseWriter, r *http.Request,
 	status int,
 ) {
-	respondErr(w, r, status, http.StatusText(status))
+	RespondErr(w, r, status, http.StatusText(status))
 }

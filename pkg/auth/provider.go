@@ -82,7 +82,7 @@ func TennantMiddleware(w http.ResponseWriter, r *http.Request, next http.Handler
 		t.ID = *tenantID
 
 	}
-	r = r.WithContext(context.WithValue(r.Context(), models.TenantKey, *t))
+	r = r.WithContext(context.WithValue(r.Context(), TenantKey, t))
 	next(w, r)
 }
 

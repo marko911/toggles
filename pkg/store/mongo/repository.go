@@ -183,6 +183,7 @@ func (s *Store) GetTenant(key string) *models.Tenant {
 func (s *Store) GetTenantFromAPIKey(apiKey string) *models.Tenant {
 	sess := s.Copy()
 	defer sess.Close()
+	fmt.Println("api _________________keyyyyyyy", apiKey)
 
 	d := sess.DB(s.DBName)
 	var t models.Tenant

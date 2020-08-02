@@ -32,9 +32,17 @@ type Router struct {
 func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router := mux.NewRouter()
 	tenantRoutes := mux.NewRouter().PathPrefix("/api").Subrouter()
+	evalRoutes := mux.NewRouter().PathPrefix("/evals").Subrouter()
 
 	tenantRoutes.HandleFunc("/flags", FlagsHandler)
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
+
+	evalRoutes.HandleFunc("/flags/{clientKey}", EvaluationHandler).Methods("POST")
+	evalRoutes.HandleFunc("/record/{clientKey}", RecordHandler).Methods("POST")
+
+	evalRoutes.Use(
+		auth.EvalTenantMiddleware(ctx),
+	)
 
 	router.PathPrefix("/api").Handler(negroni.New(
 		negroni.HandlerFunc(r.Authorizer.GetHandler()),
@@ -42,7 +50,9 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 		negroni.Wrap(tenantRoutes),
 	))
 
-	router.HandleFunc("/evaluate/{clientKey}", EvaluationHandler).Methods("POST")
+	router.PathPrefix("/evals").Handler(negroni.New(
+		negroni.Wrap(evalRoutes),
+	))
 
 	router.Use(
 		cors(ctx),

@@ -10,7 +10,6 @@ import (
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
-	"github.com/gorilla/mux"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 )
@@ -19,15 +18,11 @@ import (
 
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	clientKey := vars["clientKey"]
-
 	read := read.FromContext(r.Context())
-
 	// get tenant user for request
-	tenant := read.GetTenantFromAPIKey(clientKey)
+	tenant := auth.TenantFromContext(r.Context())
 	if tenant == nil {
-		respondErr(w, r, http.StatusNotFound, "invalid client key")
+		RespondErr(w, r, http.StatusNotFound, "invalid client key")
 		return
 	}
 
@@ -51,7 +46,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 		if err := createService.CreateUser(&u); err != nil {
-			respondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
+			RespondErr(w, r, http.StatusBadRequest, "failed to persist user to storage", err)
 			errc <- err
 		}
 	}()
@@ -61,7 +56,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 		if err := createService.CreateAttributes(&u); err != nil {
-			respondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
+			RespondErr(w, r, http.StatusBadRequest, "failed to add custom attribute to storage", err)
 			errc <- err
 		}
 	}()
@@ -95,14 +90,14 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 			matchedVariation, err = s.MatchDefault(*eval, &flag)
 			if err != nil {
 				logrus.Error(err)
-				respondErr(w, r, http.StatusBadRequest, err)
+				RespondErr(w, r, http.StatusBadRequest, err)
 				return
 			}
 		} else {
 			matchedVariation, err = s.Evaluate(*eval, &flag)
 			if err != nil {
 				logrus.Error(err)
-				respondErr(w, r, http.StatusBadRequest, err)
+				RespondErr(w, r, http.StatusBadRequest, err)
 				return
 			}
 		}
@@ -123,19 +118,19 @@ func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.Evaluat
 	var e evaluate.EvaluationRequest
 
 	if err := decodeBody(r, &e); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
+		RespondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
 		return nil
 	}
 
 	var u models.User
 	err := mapstructure.Decode(e.User, &u)
 	if err != nil {
-		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
+		RespondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
 		return nil
 	}
 
 	if u.Key == "" {
-		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
+		RespondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingUser)
 		return nil
 	}
 

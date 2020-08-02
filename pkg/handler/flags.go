@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/errors"
 	"toggle/server/pkg/models"
@@ -33,12 +34,12 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 
 	s := read.FromContext(r.Context())
-	tenant := models.TenantFromContext(r.Context())
+	tenant := auth.TenantFromContext(r.Context())
 	fmt.Println("tenanttttt", tenant)
-	c, err := s.GetFlags(tenant)
+	c, err := s.GetFlags(*tenant)
 	if err != nil {
 		logrus.Error("Getting flags failed: ", err)
-		respondErr(w, r, http.StatusBadRequest, err)
+		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
 	respond(w, r, http.StatusOK, c)
@@ -48,20 +49,20 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 // HandleFlagsPost adds a new flag to database
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	s := create.FromContext(r.Context())
-	tenant := models.TenantFromContext(r.Context())
+	tenant := auth.TenantFromContext(r.Context())
 	flag := &models.Flag{Tenant: tenant.ID}
 	if err := decodeBody(r, flag); err != nil {
-		respondErr(w, r, http.StatusBadRequest, err)
+		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if _, err := flag.Validate(); err != nil {
-		respondErr(w, r, http.StatusBadRequest, err)
+		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := s.CreateFlag(flag); err != nil {
-		respondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
+		RespondErr(w, r, http.StatusBadRequest, errors.ErrFailedCreateFlag, err)
 		return
 	}
 
