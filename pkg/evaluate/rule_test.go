@@ -10,8 +10,8 @@ import (
 
 var randomKeyCharset = []byte("123456789abcdefghijkmnopqrstuvwxyz")
 
-func GenerateTarget(a, o, v string) []models.Target {
-	r := []models.Target{
+func GenerateFlag(a, o, v string) *models.Flag {
+	targets := []models.Target{
 		{
 			Rules: []models.Rule{
 				{Attribute: a, Operator: o, Value: v},
@@ -23,16 +23,17 @@ func GenerateTarget(a, o, v string) []models.Target {
 		},
 	}
 
-	return r
+	return &models.Flag{
+		Targets: targets,
+	}
 }
 
 func TestEvaluationRequest_MatchFlagTarget(t *testing.T) {
 	type fields struct {
-		FlagKey string
-		User    interface{}
+		User interface{}
 	}
 	type args struct {
-		targets []models.Target
+		flag *models.Flag
 	}
 	tests := []struct {
 		name    string
@@ -42,112 +43,112 @@ func TestEvaluationRequest_MatchFlagTarget(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"CONTAINS operator", fields{"beta-users", map[string]interface{}{
+			"CONTAINS operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"groups": []string{"males"},
 				},
 			},
 			},
-			args{targets: GenerateTarget("groups", models.ConstraintOperatorCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
+			args{flag: GenerateFlag("groups", models.ConstraintOperatorCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"NOT CONTAINS operator", fields{"beta-users", map[string]interface{}{
+			"NOT CONTAINS operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"groups": []string{"gorillas"},
 				},
 			},
 			},
-			args{targets: GenerateTarget("groups", models.ConstraintOperatorNOTCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
+			args{flag: GenerateFlag("groups", models.ConstraintOperatorNOTCONTAINS, "\"males\"")}, // always have to provide quoted value to evaluation lib
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"IN operator", fields{"beta-users", map[string]interface{}{
+			"IN operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"name": "marko",
 				},
 			},
 			},
-			args{targets: GenerateTarget("name", models.ConstraintOperatorIN, `["marko","hana"]`)},
+			args{flag: GenerateFlag("name", models.ConstraintOperatorIN, `["marko","hana"]`)},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"NOT IN operator", fields{"beta-users", map[string]interface{}{
+			"NOT IN operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"name": "jack",
 				},
 			},
 			},
-			args{targets: GenerateTarget("name", models.ConstraintOperatorNOTIN, `["marko","hana"]`)},
+			args{flag: GenerateFlag("name", models.ConstraintOperatorNOTIN, `["marko","hana"]`)},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"EQ operator", fields{"beta-users", map[string]interface{}{
+			"EQ operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"name": "jack",
 				},
 			},
 			},
-			args{targets: GenerateTarget("name", models.ConstraintOperatorEQ, "\"jack\"")},
+			args{flag: GenerateFlag("name", models.ConstraintOperatorEQ, "\"jack\"")},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"LT operator", fields{"beta-users", map[string]interface{}{
+			"LT operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"age": 25,
 				},
 			},
 			},
-			args{targets: GenerateTarget("age", models.ConstraintOperatorLT, "40")},
+			args{flag: GenerateFlag("age", models.ConstraintOperatorLT, "40")},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"LTE operator", fields{"beta-users", map[string]interface{}{
+			"LTE operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"age": 40,
 				},
 			},
 			},
-			args{targets: GenerateTarget("age", models.ConstraintOperatorLTE, "40")},
+			args{flag: GenerateFlag("age", models.ConstraintOperatorLTE, "40")},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
 			false,
 		},
 		{
-			"EREG operator", fields{"beta-users", map[string]interface{}{
+			"EREG operator", fields{map[string]interface{}{
 				"key": uniuri.NewLenChars(uniuri.StdLen, randomKeyCharset),
 				"attributes": map[string]interface{}{
 					"regex": "John",
 				},
 			},
 			},
-			args{targets: GenerateTarget("regex", models.ConstraintOperatorEREG, `"([A-Z])\w+"`)},
+			args{flag: GenerateFlag("regex", models.ConstraintOperatorEREG, `"([A-Z])\w+"`)},
 			&models.Variation{
 				Name: "On", Percent: 100,
 			},
@@ -162,10 +163,9 @@ func TestEvaluationRequest_MatchFlagTarget(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			e := &EvaluationRequest{
-				FlagKey: tt.fields.FlagKey,
-				User:    tt.fields.User,
+				User: tt.fields.User,
 			}
-			got, err := e.MatchFlagTarget(tt.args.targets)
+			got, err := e.MatchFlagTarget(tt.args.flag)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("EvaluationRequest.MatchFlagTarget() error = %v, wantErr %v", err, tt.wantErr)

@@ -61,18 +61,21 @@ func TennantMiddleware(w http.ResponseWriter, r *http.Request, next http.Handler
 	t := &models.Tenant{}
 	if tenantID == nil {
 		a := FromContext(r.Context())
-		user := a.GetUserInfo(token)
+		userKey := a.GetUserInfo(token)
 
 		s := read.FromContext(r.Context())
-		t = s.GetTenant(user)
+		// Get tenant from db based on userKey (email)
+		t = s.GetTenant(userKey)
 		if t == nil {
 			service := create.FromContext(r.Context())
-			t, err = service.CreateTenant(user)
+			// tenant == nil means user just signed up, create a new tenant
+			t, err = service.CreateTenant(userKey)
 			if err != nil {
 				logrus.Error(err.Error())
 			}
 			fmt.Println("addding to ctx -------------", t)
 		}
+		// add tenant token to id in cache
 		c.tenants[token] = t.ID
 
 	} else {

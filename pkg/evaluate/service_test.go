@@ -80,31 +80,55 @@ func Test_service_Evaluate(t *testing.T) {
 		{
 			"flag with user targeting",
 			fields{r: &mock.EvaluateByte{Flag: userTarget}},
-			args{EvaluationRequest{"hey-ladies", user{Key: "jenny@hey.com"}}},
+			args{EvaluationRequest{user{Key: "jenny@hey.com"}}},
 			&models.Evaluation{
-				models.User{Key: "jenny@hey.com"},
-				&models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
-				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
-				0,
+				Variation: &models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
+				Flag: models.Flag{
+					ID:      bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
+					Name:    "Young chicks",
+					Key:     "hey-ladies",
+					Enabled: true,
+					Variations: []models.Variation{
+						{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
+						{Name: "Off"},
+					},
+					Tenant: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49"),
+				},
+				Count: 0,
 			},
 			false,
 		},
 		{
 			"flag default target Red variation",
 			fields{r: &mock.EvaluateByte{Flag: defaultTargetFlag}},
-			args{EvaluationRequest{"hey-ladies", map[string]interface{}{
+			args{EvaluationRequest{map[string]interface{}{
 				"key": "jenny@hey.com",
 				"attributes": map[string]interface{}{
 					"groups": []string{"ladies"},
 				},
 			}}},
 			&models.Evaluation{
-				models.User{Key: "jenny@hey.com", Attributes: map[string]interface{}{
-					"groups": []string{"ladies"},
-				}},
-				&models.Variation{Name: "Red", Percent: 100},
-				bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
-				0,
+				Variation: &models.Variation{Name: "Red", Percent: 100},
+				Flag: models.Flag{
+					ID:         bson.ObjectIdHex("5f09d08d40a5b800068a5d88"),
+					Name:       "alpha users",
+					Enabled:    true,
+					Key:        "alpha-users",
+					Variations: []models.Variation{{Name: "Red", Percent: 100}, {Name: "Blue"}, {Name: "Purple"}},
+					Targets: []models.Target{
+						{
+							Rules: []models.Rule{
+								{Attribute: "groups", Operator: "CONTAINS", Value: "\"alpha users\""},
+							},
+							Variations: []models.Variation{
+								{Name: "Red", Percent: 30},
+								{Name: "Blue", Percent: 50},
+								{Name: "Purple", Percent: 20},
+							},
+						},
+					},
+				},
+				Count: 0,
 			},
 			false,
 		},
@@ -114,7 +138,7 @@ func Test_service_Evaluate(t *testing.T) {
 	{
 
 		for _, tt := range tests {
-			t.Logf("\tWhen checking \"%s\" for matching variation", tt.name)
+			t.Logf("\n\tWhen checking \"%s\" for matching variation", tt.name)
 
 			t.Run(tt.name, func(t *testing.T) {
 				is := is.New(t)
@@ -122,7 +146,8 @@ func Test_service_Evaluate(t *testing.T) {
 				s := &service{
 					r: tt.fields.r,
 				}
-				got, err := s.Evaluate(tt.args.e)
+				flag, err := s.r.GetFlag("flag")
+				got, err := s.Evaluate(tt.args.e, flag)
 
 				is.NoErr(err)
 
@@ -230,9 +255,9 @@ func TestMatchingDistributions(t *testing.T) {
 					"attributes": tt.attributes,
 				}
 
-				e := EvaluationRequest{"alpha-users", u}
-
-				got, err := s.Evaluate(e)
+				e := EvaluationRequest{u}
+				flag, err := s.r.GetFlag("asd")
+				got, err := s.Evaluate(e, flag)
 
 				is.NoErr(err)
 

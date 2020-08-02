@@ -8,38 +8,14 @@ import (
 	"strings"
 	"testing"
 	"toggle/server/pkg/errors"
-	"toggle/server/pkg/evaluate"
 	"toggle/server/pkg/handler/testutil"
 	"toggle/server/pkg/mock"
-	"toggle/server/pkg/models"
 
 	"github.com/cheekybits/is"
-	"gopkg.in/mgo.v2/bson"
 )
-
-var badRequestMissingFlag = []byte(`{
-	"user": {
-		"key":"marko@hey.com",
-		"attributes": {
-			"groups": ["beta testers"],
-			"gender": "male"
-		}
-	}
-}`)
 
 var missingFieldUser = []byte(`{
 	"flagKey": "someky"
-}`)
-
-var invalidFlagKey = []byte(`{
-	"flagKey":"doesnt-matter-whats-here",
-	"user": {
-		"key":"marko@hey.com",
-		"attributes": {
-			"groups": ["beta testers"],
-			"gender": "male"
-		}
-	}
 }`)
 
 func TestEvaluationHandler(t *testing.T) {
@@ -49,24 +25,10 @@ func TestEvaluationHandler(t *testing.T) {
 		Expected   string
 		CtxWrapper func(c context.Context) context.Context
 	}{
-		"missing flag in request":      {Body: bytes.NewBuffer(badRequestMissingFlag), Expected: errors.ErrEvalRequestMissingFlag.Error()},
 		"mising user field in request": {Body: bytes.NewBuffer(missingFieldUser), Expected: errors.ErrEvalRequestMissingUser.Error()},
-		"invalid flag key": {
-			Body:     bytes.NewBuffer(invalidFlagKey),
-			Expected: errors.ErrFlagNotFound.Error(),
-			CtxWrapper: func(c context.Context) context.Context {
-				mockEvalService := evaluate.NewService(&mock.EvaluateInvalidFlagKey{})
-				return context.WithValue(c, evaluate.ServiceKey, mockEvalService)
-			}},
 	}
 
-	ctx := mock.CreateContext(t,
-		func(c context.Context) context.Context {
-
-			tempTenant := models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
-			return context.WithValue(c, models.TenantKey, tempTenant)
-		},
-	)
+	ctx := mock.CreateContext(t)
 	t.Log("Given the need to be evaluate a flag:")
 	{
 
@@ -74,7 +36,7 @@ func TestEvaluationHandler(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				is := is.New(t)
 
-				req, err := http.NewRequest("POST", "/evaluate", tc.Body)
+				req, err := http.NewRequest("POST", "/evaluate/abcdef", tc.Body)
 				is.NoErr(err)
 
 				if tc.CtxWrapper != nil {

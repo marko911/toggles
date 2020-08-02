@@ -24,9 +24,9 @@ const percentMultiplier float64 = 100
 
 // MatchFlagTarget parses all flag rules returning a variation if
 // user matches
-func (e *EvaluationRequest) MatchFlagTarget(targets []models.Target) (*models.Variation, error) {
+func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variation, error) {
 
-	for _, target := range targets {
+	for _, target := range flag.Targets {
 
 		m, ok := e.User.(map[string]interface{})
 		if !ok {
@@ -57,7 +57,7 @@ func (e *EvaluationRequest) MatchFlagTarget(targets []models.Target) (*models.Va
 					return nil, errors.New("Failed decoding user from evaluation request object")
 				}
 
-				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
+				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, flag.Key))
 				percents := Percents(target.Variations)
 				var inRange bool
 				var min, accumulatedMax float64
@@ -93,7 +93,7 @@ func (e *EvaluationRequest) MatchDefaultVariations(f *models.Flag) (*models.Vari
 		return nil, errors.New("Failed decoding user from evaluation request object")
 	}
 
-	fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, e.FlagKey))
+	fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, f.Key))
 	percents := Percents(f.Variations)
 	var inRange bool
 	var min, accumulatedMax float64

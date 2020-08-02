@@ -1,14 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/errors"
 	"toggle/server/pkg/evaluate"
-	"toggle/server/pkg/message"
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
@@ -83,40 +81,39 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	s := evaluate.FromContext(r.Context())
 
+	flags, err := read.GetFlags(*tenant)
+
+	var v []models.Evaluation
+
+	for _, flag := range flags {
+
+		// TODO: invalidate cache when flag data changes
+		cache := auth.CacheFromContext(r.Context())
+		var matchedVariation *models.Evaluation
+
+		if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
+			matchedVariation, err = s.MatchDefault(*eval, &flag)
+			if err != nil {
+				logrus.Error(err)
+				respondErr(w, r, http.StatusBadRequest, err)
+				return
+			}
+		} else {
+			matchedVariation, err = s.Evaluate(*eval, &flag)
+			if err != nil {
+				logrus.Error(err)
+				respondErr(w, r, http.StatusBadRequest, err)
+				return
+			}
+		}
+		v = append(v, *matchedVariation)
+
+	}
 	// check flag limit first
-	flag, err := read.GetFlag(eval.FlagKey)
 
-	if err != nil {
-		respondErr(w, r, http.StatusBadRequest, err)
-		return
-	}
+	// messenger := message.FromContext(r.Context())
 
-	var v *models.Evaluation
-
-	// TODO: invalidate cache when flag data changes
-	cache := auth.CacheFromContext(r.Context())
-
-	if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
-		fmt.Println("LIMIT REACHED-----------------------------Returning default")
-		v, err = s.MatchDefault(*eval)
-		if err != nil {
-			logrus.Error(err)
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-
-	} else {
-		v, err = s.Evaluate(*eval)
-		if err != nil {
-			logrus.Error(err)
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-	}
-
-	messenger := message.FromContext(r.Context())
-
-	messenger.Publish("evaluations", v)
+	// messenger.Publish("evaluations", v)
 
 	respond(w, r, http.StatusCreated, v)
 
@@ -127,11 +124,6 @@ func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.Evaluat
 
 	if err := decodeBody(r, &e); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
-		return nil
-	}
-
-	if e.FlagKey == "" {
-		respondErr(w, r, http.StatusBadRequest, errors.ErrEvalRequestMissingFlag)
 		return nil
 	}
 

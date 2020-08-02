@@ -45,10 +45,10 @@ func (s *Store) InsertEvaluation(e *models.Evaluation) error {
 	sess := s.Copy()
 	defer sess.Close()
 	d := sess.DB(s.DBName)
-	err := d.C("evaluations").Update(bson.M{"flagId": e.FlagID}, bson.M{"$inc": bson.M{"count": 1}})
+	err := d.C("evaluations").Update(bson.M{"flag.key": e.Flag.Key}, bson.M{"$inc": bson.M{"count": 1}})
 	if err != nil {
 		fmt.Println("problem upsert0-------------------------", err)
-		fmt.Println("eeeeeeeeeeeeeeeeee", e.FlagID)
+		fmt.Println("eeeeeeeeeeeeeeeeee", e.Flag.ID)
 		insertErr := d.C("evaluations").Insert(e)
 		return insertErr
 	}

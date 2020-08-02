@@ -54,7 +54,15 @@ func (m *mockRead) GetUsers(models.Tenant) ([]models.User, error) {
 func (m *mockRead) GetTenant(key string) *models.Tenant {
 	var t models.Tenant
 
-	json.Unmarshal(m.flagsJSON, &t)
+	json.Unmarshal(m.tenantJSON, &t)
+
+	return &t
+}
+
+func (m *mockRead) GetTenantFromAPIKey(apiKey string) *models.Tenant {
+	var t models.Tenant
+
+	json.Unmarshal(m.tenantJSON, &t)
 
 	return &t
 }

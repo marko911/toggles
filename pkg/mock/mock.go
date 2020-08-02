@@ -69,6 +69,11 @@ func initReadService(c context.Context) context.Context {
 			}
 		]
 		`),
+		tenantJSON: []byte(`{
+				_id: ObjectId('5f20b44d58760bb5911d15bf'),
+				key: 'marko.bilal@hey.com',
+				apiKey: 'abcdef'
+		}`),
 	})
 	return context.WithValue(c, read.ServiceKey, mockReadService)
 }

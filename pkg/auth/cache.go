@@ -79,7 +79,7 @@ func (cache *Cache) reloadMapCache(s read.Service) error {
 	evalCacheMap := make(map[bson.ObjectId]int)
 
 	for _, eval := range evals {
-		evalCacheMap[eval.FlagID] = eval.Count
+		evalCacheMap[eval.Flag.ID] = eval.Count
 	}
 
 	cache.mapCacheLock.RLock()

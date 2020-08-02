@@ -68,8 +68,7 @@ type Tenant struct {
 // Evaluation determines what variation user is shown, can be simple true or false
 // or a specific variation of flag being evaluated
 type Evaluation struct {
-	User      User          `json:"user" bson:"user"`
-	Variation *Variation    `json:"variation" bson:"variation"`
-	FlagID    bson.ObjectId `json:"flagId" bson:"flagId"`
-	Count     int           `json:"count,omitempty" bson:"count"`
+	Variation *Variation `json:"variation" bson:"variation"`
+	Flag      Flag       `json:"flag" bson:"flag"`
+	Count     int        `json:"count,omitempty" bson:"count"`
 }
