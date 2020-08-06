@@ -12,6 +12,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type FlagsResponse struct {
+	Flags  []models.Flag `json:"flags"`
+	APIKey string        `json:"apiKey"`
+}
+
 // FlagsHandler routes flag requests
 func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -42,7 +47,7 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
-	respond(w, r, http.StatusOK, c)
+	respond(w, r, http.StatusOK, FlagsResponse{c, tenant.APIKEY})
 
 }
 
