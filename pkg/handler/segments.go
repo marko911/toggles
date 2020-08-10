@@ -38,7 +38,6 @@ func HandleSegmentsGet(w http.ResponseWriter, r *http.Request) {
 		respondHTTPErr(w, r, http.StatusBadRequest)
 		return
 	}
-	encodeBody(w, r, &c)
 	respond(w, r, http.StatusOK, c)
 }
 
