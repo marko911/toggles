@@ -51,6 +51,9 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//SuccessFlagCreated is message returned on success of flag post
+var SuccessFlagCreated = "Flag created successfully"
+
 // HandleFlagsPost adds a new flag to database
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	s := create.FromContext(r.Context())
@@ -71,6 +74,6 @@ func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respond(w, r, http.StatusCreated, errors.SuccessFlagCreated)
+	respond(w, r, http.StatusCreated, SuccessFlagCreated)
 
 }
