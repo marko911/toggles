@@ -80,6 +80,8 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	var v []models.Evaluation
 
+	// we return all flag evalutaions for this user for client sdk to have
+	// avoids having to call multiple api calls at flag fork point
 	for _, flag := range flags {
 
 		// TODO: invalidate cache when flag data changes

@@ -24,6 +24,19 @@ func (s *Store) InsertFlag(f *models.Flag) error {
 	return nil
 }
 
+// UpdateFlag is for updating existing flags in mongo
+func (s *Store) UpdateFlag(f *models.Flag) error {
+	sess := s.Copy()
+	defer sess.Close()
+	d := sess.DB(s.DBName)
+	err := d.C("flags").Update(bson.M{"_id": f.ID}, f)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
+}
+
 //InsertSegment saves a segment to mongo
 func (s *Store) InsertSegment(seg *models.Segment) error {
 	sess := s.Copy()
@@ -47,8 +60,6 @@ func (s *Store) InsertEvaluation(e *models.Evaluation) error {
 	d := sess.DB(s.DBName)
 	err := d.C("evaluations").Update(bson.M{"flag.key": e.Flag.Key}, bson.M{"$inc": bson.M{"count": 1}})
 	if err != nil {
-		fmt.Println("problem upsert0-------------------------", err)
-		fmt.Println("eeeeeeeeeeeeeeeeee", e.Flag.ID)
 		insertErr := d.C("evaluations").Insert(e)
 		return insertErr
 	}

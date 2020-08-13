@@ -8,6 +8,7 @@ import (
 // Service provides create operations
 type Service interface {
 	CreateFlag(*models.Flag) error
+	UpdateFlag(*models.Flag) error
 	CreateSegment(*models.Segment) error
 	CreateUser(*models.User) error
 	CreateAttributes(*models.User) error
@@ -18,6 +19,7 @@ type Service interface {
 // Repository handles persistance of entity data
 type Repository interface {
 	InsertFlag(*models.Flag) error
+	UpdateFlag(*models.Flag) error
 	InsertSegment(*models.Segment) error
 	InsertUser(*models.User) error
 	InsertAttributes([]models.Attribute) error
@@ -78,4 +80,8 @@ func (s *service) CreateTenant(key string) (*models.Tenant, error) {
 
 func (s *service) CreateEvaluation(e *models.Evaluation) error {
 	return s.r.InsertEvaluation(e)
+}
+
+func (s *service) UpdateFlag(f *models.Flag) error {
+	return s.r.UpdateFlag(f)
 }

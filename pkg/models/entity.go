@@ -1,6 +1,10 @@
 package models
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	"time"
+
+	"gopkg.in/mgo.v2/bson"
+)
 
 // Flag represents a feature flag object
 type Flag struct {
@@ -12,6 +16,7 @@ type Flag struct {
 	Targets    []Target      `json:"targets,omitempty" bson:"targets,omitempty"`
 	Tenant     bson.ObjectId `json:"tenant" bson:"tenant"`
 	Limit      int           `json:"limit,omitempty" bson:"limit,omitempty"`
+	Evaluated  time.Time     `json:"evaluated,omitempty" bson:"evaluated,omitempty"`
 }
 
 // Rule is a constraint placed on users being evaluated
