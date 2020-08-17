@@ -36,7 +36,7 @@ var GetCache = func() *Cache {
 	return cache
 }
 
-// GetByAuthToken returns tenant id via token lookup
+// GetByAuthToken returns tenant id via cache token lookup
 func (cache *Cache) GetByAuthToken(token string) *bson.ObjectId {
 	cache.mapCacheLock.RLock()
 	defer cache.mapCacheLock.RUnlock()

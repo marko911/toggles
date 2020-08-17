@@ -118,6 +118,7 @@ func (a *Authorizer) GetHandler() func(rw http.ResponseWriter, r *http.Request, 
 	return jwtMiddleware.HandlerWithNext
 }
 
+//GetUserInfo grabs user email from auth0 token via auth0 api call
 func (a *Authorizer) GetUserInfo(token string) string {
 	endpoint := "https://" + os.Getenv("AUTH0_DOMAIN") + "/userinfo"
 	bearer := "Bearer " + token

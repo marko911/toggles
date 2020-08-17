@@ -106,7 +106,6 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 		v = append(v, *matchedVariation)
 
 	}
-	// check flag limit first
 
 	respond(w, r, http.StatusCreated, v)
 
