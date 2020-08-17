@@ -7,6 +7,7 @@ import (
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/errors"
 	"toggle/server/pkg/evaluate"
+	"toggle/server/pkg/message"
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Evaluation represents a client request for flag evaluation
+const messageSubject string = "evaluations"
 
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,38 +77,46 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 
 	s := evaluate.FromContext(r.Context())
 
-	flags, err := read.GetFlags(*tenant)
+	//222 flags, err := read.GetFlags(*tenant)
 
-	var v []models.Evaluation
+	flag, err := read.GetFlag(eval.FlagKey)
+	if err != nil {
+		RespondErr(w, r, http.StatusBadRequest, err)
+		return
+	}
+	// 222 var v []models.Evaluation
 
 	// we return all flag evalutaions for this user for client sdk to have
 	// avoids having to call multiple api calls at flag fork point
-	for _, flag := range flags {
+	// for _, flag := range flags { 222
 
-		// TODO: invalidate cache when flag data changes
-		cache := auth.CacheFromContext(r.Context())
-		var matchedVariation *models.Evaluation
+	// TODO: invalidate cache when flag data changes
+	cache := auth.CacheFromContext(r.Context())
+	var matchedVariation *models.Evaluation
 
-		if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
-			matchedVariation, err = s.MatchDefault(*eval, &flag)
-			if err != nil {
-				logrus.Error(err)
-				RespondErr(w, r, http.StatusBadRequest, err)
-				return
-			}
-		} else {
-			matchedVariation, err = s.Evaluate(*eval, &flag)
-			if err != nil {
-				logrus.Error(err)
-				RespondErr(w, r, http.StatusBadRequest, err)
-				return
-			}
+	if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
+		matchedVariation, err = s.MatchDefault(*eval, flag)
+		if err != nil {
+			logrus.Error(err)
+			RespondErr(w, r, http.StatusBadRequest, err)
+			return
 		}
-		v = append(v, *matchedVariation)
-
+	} else {
+		matchedVariation, err = s.Evaluate(*eval, flag)
+		if err != nil {
+			logrus.Error(err)
+			RespondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
 	}
+	// v = append(v, *matchedVariation) 222
 
-	respond(w, r, http.StatusCreated, v)
+	// } 2222
+	messenger := message.FromContext(r.Context())
+
+	messenger.Publish(messageSubject, matchedVariation)
+
+	respond(w, r, http.StatusCreated, matchedVariation)
 
 }
 
@@ -116,6 +125,11 @@ func handleEvalRequest(w http.ResponseWriter, r *http.Request) *evaluate.Evaluat
 
 	if err := decodeBody(r, &e); err != nil {
 		RespondErr(w, r, http.StatusBadRequest, "request body structure is invalid: ", err)
+		return nil
+	}
+
+	if e.FlagKey == "" {
+		RespondErr(w, r, http.StatusBadRequest, errors.ErrJSONPayloadInvalidFlagKey)
 		return nil
 	}
 
