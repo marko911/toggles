@@ -31,9 +31,6 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 		HandleFlagsPost(w, r)
 		return
 
-		// case "DELETE": TODO: implemenet
-		// 	HandleFlagsDelete(w, r)
-		// 	return
 	}
 	respondHTTPErr(w, r, http.StatusNotFound)
 

@@ -19,6 +19,9 @@ var (
 	//ErrFailedCreateFlag is returned when flag creation fails
 	ErrFailedCreateFlag = errors.New("Error creating flag")
 
+	//ErrFailedUpdateSegment is returned when db update fails
+	ErrFailedUpdateSegment = errors.New("error updating segment")
+
 	//ErrJSONPayloadInvalidVariations returns when flag has no variations
 	ErrJSONPayloadInvalidVariations = errors.New("invalid flag, variations required")
 

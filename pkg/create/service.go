@@ -10,6 +10,7 @@ type Service interface {
 	CreateFlag(*models.Flag) error
 	UpdateFlag(*models.Flag) error
 	CreateSegment(*models.Segment) error
+	UpdateSegment(*models.Segment) error
 	CreateUser(*models.User) error
 	CreateAttributes(*models.User) error
 	CreateTenant(key string) (*models.Tenant, error)
@@ -21,6 +22,7 @@ type Repository interface {
 	InsertFlag(*models.Flag) error
 	UpdateFlag(*models.Flag) error
 	InsertSegment(*models.Segment) error
+	UpdateSegment(*models.Segment) error
 	InsertUser(*models.User) error
 	InsertAttributes([]models.Attribute) error
 	InsertTenant(*models.Tenant) error
@@ -84,4 +86,8 @@ func (s *service) CreateEvaluation(e *models.Evaluation) error {
 
 func (s *service) UpdateFlag(f *models.Flag) error {
 	return s.r.UpdateFlag(f)
+}
+
+func (s *service) UpdateSegment(seg *models.Segment) error {
+	return s.r.UpdateSegment(seg)
 }

@@ -37,6 +37,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	tenantRoutes.HandleFunc("/flags/{id}", FlagHandler)
 	tenantRoutes.HandleFunc("/flags", FlagsHandler)
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
+	tenantRoutes.HandleFunc("/segments/{id}", SegmentHandler)
 
 	evalRoutes.HandleFunc("/flags/{clientKey}", EvaluationHandler).Methods("POST")
 	evalRoutes.HandleFunc("/record/{clientKey}", RecordHandler).Methods("POST")

@@ -37,6 +37,20 @@ func (s *Store) UpdateFlag(f *models.Flag) error {
 	return nil
 }
 
+// UpdateSegment is for updating existing segments in mongo
+func (s *Store) UpdateSegment(seg *models.Segment) error {
+	sess := s.Copy()
+	defer sess.Close()
+	d := sess.DB(s.DBName)
+	err := d.C("segments").Update(bson.M{"_id": seg.ID}, seg)
+	if err != nil {
+		fmt.Println("-------------", seg.Tenant)
+		logrus.Error(err)
+		return err
+	}
+	return nil
+}
+
 //InsertSegment saves a segment to mongo
 func (s *Store) InsertSegment(seg *models.Segment) error {
 	sess := s.Copy()
