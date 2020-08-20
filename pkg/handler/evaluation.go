@@ -112,6 +112,9 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	// v = append(v, *matchedVariation) 222
 
 	// } 2222
+
+	matchedVariation.User = u
+
 	messenger := message.FromContext(r.Context())
 
 	messenger.Publish(messageSubject, matchedVariation)
