@@ -77,4 +77,8 @@ type Evaluation struct {
 	Flag      Flag        `json:"flag" bson:"flag"`
 	Count     int         `json:"count,omitempty" bson:"count"`
 	User      interface{} `json:"user" bson:"user"`
+	CreatedAt time.Time   `json:"evaluated,omitempty" bson:"evaluated,omitempty"`
+}
+
+type EvaluationFormatted struct {
 }

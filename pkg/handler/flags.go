@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // FlagsResponse is the json payload for frontend
@@ -38,6 +39,18 @@ func FlagsHandler(w http.ResponseWriter, r *http.Request) {
 
 // FlagHandler is for individual flag updates
 func FlagHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "PUT":
+		HandleFlagPut(w, r)
+		return
+	case "GET":
+		HandleFlagGet(w, r)
+	}
+
+}
+
+// HandleFlagPut updates a flag
+func HandleFlagPut(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) == 0 {
@@ -51,13 +64,31 @@ func FlagHandler(w http.ResponseWriter, r *http.Request) {
 		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println("flagIDDDD", flag.ID)
 
 	if err := s.UpdateFlag(flag); err != nil {
 		RespondErr(w, r, http.StatusBadRequest, e.ErrFailedCreateFlag, err)
 		return
 	}
 	respond(w, r, http.StatusCreated, flag)
+}
+
+// HandleFlagGet retrieves flag evaluation records
+func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("_---------------------------------------------------")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if len(id) == 0 {
+		RespondErr(w, r, http.StatusBadRequest, errors.New("flag id required"))
+		return
+	}
+	rs := read.FromContext(r.Context())
+	evaluations, err := rs.GetFlagEvals(bson.ObjectIdHex(id))
+	fmt.Println("EVALUATIOSN", evaluations)
+	if err != nil {
+		RespondErr(w, r, http.StatusBadRequest, err)
+
+	}
+	respond(w, r, http.StatusAccepted, evaluations)
 
 }
 

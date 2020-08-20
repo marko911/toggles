@@ -22,6 +22,7 @@ type Collection interface {
 	Insert(docs ...interface{}) error
 	Remove(selector interface{}) error
 	Update(selector interface{}, update interface{}) error
+	Pipe(pipeline interface{}) *mgo.Pipe
 	Upsert(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error)
 	EnsureIndex(index mgo.Index) error
 	RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err error)

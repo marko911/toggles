@@ -45,6 +45,11 @@ func (mc MockCollection) Upsert(selector interface{}, update interface{}) (info 
 	return nil, nil
 }
 
+//Pipe mock
+func (mc MockCollection) Pipe(pipeline interface{}) *mgo.Pipe {
+	return nil
+}
+
 // EnsureIndex mock.
 func (mc MockCollection) EnsureIndex(index mgo.Index) error {
 	return nil

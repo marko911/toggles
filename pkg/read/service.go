@@ -2,6 +2,8 @@ package read
 
 import (
 	"toggle/server/pkg/models"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Service provides read operations
@@ -12,6 +14,7 @@ type Service interface {
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
+	GetFlagEvals(bson.ObjectId) ([]models.Evaluation, error)
 	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 
@@ -23,6 +26,8 @@ type Repository interface {
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
+	GetFlagEvals(bson.ObjectId) ([]models.Evaluation, error)
+
 	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 
@@ -81,6 +86,14 @@ func (s *service) GetFlag(key string) (*models.Flag, error) {
 
 func (s *service) GetEvals() ([]models.Evaluation, error) {
 	evals, err := s.r.GetEvals()
+	if err != nil {
+		return nil, err
+	}
+	return evals, nil
+}
+
+func (s *service) GetFlagEvals(id bson.ObjectId) ([]models.Evaluation, error) {
+	evals, err := s.r.GetFlagEvals(id)
 	if err != nil {
 		return nil, err
 	}

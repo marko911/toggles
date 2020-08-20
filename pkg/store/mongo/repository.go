@@ -72,10 +72,12 @@ func (s *Store) InsertEvaluation(e *models.Evaluation) error {
 	sess := s.Copy()
 	defer sess.Close()
 	d := sess.DB(s.DBName)
-	err := d.C("evaluations").Update(bson.M{"flag.key": e.Flag.Key}, bson.M{"$inc": bson.M{"count": 1}})
+	fmt.Println("Inserting")
+	err := d.C("evaluations").Insert(e)
+	// err := d.C("evaluations").Update(bson.M{"flag.key": e.Flag.Key}, bson.M{"$inc": bson.M{"count": 1}})
 	if err != nil {
-		insertErr := d.C("evaluations").Insert(e)
-		return insertErr
+		// insertErr := d.C("evaluations").Insert(e)
+		return err
 	}
 	return nil
 }
@@ -244,5 +246,24 @@ func (s *Store) GetEvals() ([]models.Evaluation, error) {
 	var evals []models.Evaluation
 	err := d.C("evaluations").Find(nil).All(&evals)
 
+	return evals, err
+}
+
+// GetFlagEvals gets all evals for single flag
+func (s *Store) GetFlagEvals(id bson.ObjectId) ([]models.Evaluation, error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(s.DBName)
+	var evals []models.Evaluation
+	pipe := d.C("evaluations").Pipe([]bson.M{
+		{"$match": bson.M{"flag._id": id}},
+		{"$project": bson.M{"variation": 1, "user": 1}},
+	})
+	err := pipe.Iter().All(&evals)
+	if err != nil {
+		logrus.Error("Error adding to evals slice", err)
+	}
+	fmt.Println("EVAZzzzzzzzzzzzzzzz", evals)
 	return evals, err
 }

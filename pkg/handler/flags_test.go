@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"toggle/server/pkg/auth"
 	"toggle/server/pkg/errors"
 	"toggle/server/pkg/mock"
 	"toggle/server/pkg/models"
@@ -26,7 +27,7 @@ func TestHandleFlagsGet(t *testing.T) {
 		func(c context.Context) context.Context {
 
 			tempTenant := models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
-			return context.WithValue(c, models.TenantKey, tempTenant)
+			return context.WithValue(c, auth.TenantKey, tempTenant)
 		},
 	)
 
@@ -108,7 +109,7 @@ func TestHandleFlagsPost(t *testing.T) {
 		func(c context.Context) context.Context {
 
 			tempTenant := models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
-			return context.WithValue(c, models.TenantKey, tempTenant)
+			return context.WithValue(c, auth.TenantKey, tempTenant)
 		},
 	)
 
