@@ -73,12 +73,15 @@ type Tenant struct {
 // Evaluation determines what variation user is shown, can be simple true or false
 // or a specific variation of flag being evaluated
 type Evaluation struct {
-	Variation *Variation  `json:"variation" bson:"variation"`
-	Flag      Flag        `json:"flag" bson:"flag"`
-	Count     int         `json:"count,omitempty" bson:"count"`
-	User      interface{} `json:"user" bson:"user"`
-	CreatedAt time.Time   `json:"evaluated,omitempty" bson:"evaluated,omitempty"`
+	ID        bson.ObjectId `json:"id" bson:"_id"`
+	Variation *Variation    `json:"variation" bson:"variation"`
+	Flag      Flag          `json:"flag" bson:"flag"`
+	Count     int           `json:"count,omitempty" bson:"count"`
+	User      interface{}   `json:"user" bson:"user"`
+	CreatedAt time.Time     `json:"evaluated,omitempty" bson:"evaluated,omitempty"`
 }
 
-type EvaluationFormatted struct {
+// FlagStats represents evaluation data for flag
+type FlagStats struct {
+	Counts []map[string]interface{} `json:"counts" bson:"counts"`
 }

@@ -10,6 +10,7 @@ import (
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
+	"github.com/gemcook/pagination-go"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2/bson"
@@ -74,21 +75,42 @@ func HandleFlagPut(w http.ResponseWriter, r *http.Request) {
 
 // HandleFlagGet retrieves flag evaluation records
 func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("_---------------------------------------------------")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) == 0 {
 		RespondErr(w, r, http.StatusBadRequest, errors.New("flag id required"))
 		return
 	}
+	p := pagination.ParseQuery(r.URL.RequestURI())
+
+	if p.Page < 1 {
+		RespondErr(w, r, http.StatusBadRequest, errors.New("Bad flag pagination request"))
+		return
+	}
+
 	rs := read.FromContext(r.Context())
-	evaluations, err := rs.GetFlagEvals(bson.ObjectIdHex(id))
-	fmt.Println("EVALUATIOSN", evaluations)
+	flagID := bson.ObjectIdHex(id)
+
+	evaluations, c, err := rs.GetFlagEvals(flagID, p.Page, p.Limit)
+
 	if err != nil {
 		RespondErr(w, r, http.StatusBadRequest, err)
-
 	}
-	respond(w, r, http.StatusAccepted, evaluations)
+	stats, err := rs.GetFlagStats(flagID)
+
+	if err != nil {
+		RespondErr(w, r, http.StatusBadRequest, err)
+	}
+
+	response := map[string]interface{}{
+		"id":          id,
+		"total":       c,
+		"page":        p.Page,
+		"evaluations": evaluations,
+		"stats":       stats,
+	}
+
+	respond(w, r, http.StatusAccepted, response)
 
 }
 

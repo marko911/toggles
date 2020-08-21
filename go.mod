@@ -9,6 +9,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/channels v1.1.0
 	github.com/eapache/queue v1.1.0 // indirect
+	github.com/gemcook/pagination-go v0.2.1
 	github.com/google/go-cmp v0.5.0
 	github.com/gorilla/mux v1.7.4
 	github.com/mitchellh/mapstructure v1.3.2

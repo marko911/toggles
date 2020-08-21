@@ -137,7 +137,7 @@ func (s *Store) GetFlags(t models.Tenant) ([]models.Flag, error) {
 
 	var flags []models.Flag
 
-	err := d.C("flags").Find(bson.M{"tenant": t.ID}).All(&flags)
+	err := d.C("flags").Find(bson.M{"tenant": t.ID}).Sort("-evaluated").All(&flags)
 
 	if err != nil {
 		return flags, err
@@ -249,21 +249,42 @@ func (s *Store) GetEvals() ([]models.Evaluation, error) {
 	return evals, err
 }
 
+// const pageSize = 10
+
 // GetFlagEvals gets all evals for single flag
-func (s *Store) GetFlagEvals(id bson.ObjectId) ([]models.Evaluation, error) {
+func (s *Store) GetFlagEvals(id bson.ObjectId, page int, pageSize int) ([]models.Evaluation, int, error) {
 	sess := s.Copy()
 	defer sess.Close()
 
 	d := sess.DB(s.DBName)
 	var evals []models.Evaluation
-	pipe := d.C("evaluations").Pipe([]bson.M{
-		{"$match": bson.M{"flag._id": id}},
-		{"$project": bson.M{"variation": 1, "user": 1}},
-	})
-	err := pipe.Iter().All(&evals)
+	q := d.C("evaluations").Find(bson.M{"flag._id": id})
+	count, _ := q.Count()
+	err := q.Skip((page - 1) * pageSize).Limit(pageSize).All(&evals)
 	if err != nil {
 		logrus.Error("Error adding to evals slice", err)
 	}
-	fmt.Println("EVAZzzzzzzzzzzzzzzz", evals)
-	return evals, err
+	return evals, count, err
+}
+
+//GetFlagStats returns a breakdown of flag evalutaion stats
+func (s *Store) GetFlagStats(id bson.ObjectId) (*models.FlagStats, error) {
+	sess := s.Copy()
+	defer sess.Close()
+
+	d := sess.DB(s.DBName)
+	var stats models.FlagStats
+	pipe := d.C("evaluations").Pipe([]bson.M{
+		{"$match": bson.M{"flag._id": id}},
+
+		{"$group": bson.M{"_id": bson.M{"variation": "$variation.name"},
+			"count": bson.M{"$sum": 1},
+		}},
+	})
+	err := pipe.Iter().All(&stats.Counts)
+	fmt.Println("stats coutns", stats.Counts)
+	if err != nil {
+		return nil, err
+	}
+	return &stats, nil
 }

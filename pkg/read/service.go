@@ -10,11 +10,12 @@ import (
 type Service interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
 	GetFlag(key string) (*models.Flag, error)
+	GetFlagStats(id bson.ObjectId) (*models.FlagStats, error)
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
-	GetFlagEvals(bson.ObjectId) ([]models.Evaluation, error)
+	GetFlagEvals(bson.ObjectId, int, int) ([]models.Evaluation, int, error)
 	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 
@@ -22,11 +23,13 @@ type Service interface {
 type Repository interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
 	GetFlag(key string) (*models.Flag, error)
+	GetFlagStats(id bson.ObjectId) (*models.FlagStats, error)
+
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
-	GetFlagEvals(bson.ObjectId) ([]models.Evaluation, error)
+	GetFlagEvals(bson.ObjectId, int, int) ([]models.Evaluation, int, error)
 
 	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
@@ -92,10 +95,18 @@ func (s *service) GetEvals() ([]models.Evaluation, error) {
 	return evals, nil
 }
 
-func (s *service) GetFlagEvals(id bson.ObjectId) ([]models.Evaluation, error) {
-	evals, err := s.r.GetFlagEvals(id)
+func (s *service) GetFlagEvals(id bson.ObjectId, page int, limit int) ([]models.Evaluation, int, error) {
+	evals, c, err := s.r.GetFlagEvals(id, page, limit)
+	if err != nil {
+		return nil, -1, err
+	}
+	return evals, c, nil
+}
+
+func (s *service) GetFlagStats(id bson.ObjectId) (*models.FlagStats, error) {
+	stats, err := s.r.GetFlagStats(id)
 	if err != nil {
 		return nil, err
 	}
-	return evals, nil
+	return stats, err
 }
