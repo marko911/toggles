@@ -54,10 +54,12 @@ func FlagHandler(w http.ResponseWriter, r *http.Request) {
 func HandleFlagPut(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+
 	if len(id) == 0 {
 		RespondErr(w, r, http.StatusBadRequest, errors.New("flag id required"))
 		return
 	}
+
 	s := create.FromContext(r.Context())
 	flag := &models.Flag{}
 
@@ -77,10 +79,12 @@ func HandleFlagPut(w http.ResponseWriter, r *http.Request) {
 func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+
 	if len(id) == 0 {
 		RespondErr(w, r, http.StatusBadRequest, errors.New("flag id required"))
 		return
 	}
+
 	p := pagination.ParseQuery(r.URL.RequestURI())
 
 	if p.Page < 1 {
@@ -97,7 +101,6 @@ func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
 		RespondErr(w, r, http.StatusBadRequest, err)
 	}
 	stats, err := rs.GetFlagStats(flagID)
-
 	if err != nil {
 		RespondErr(w, r, http.StatusBadRequest, err)
 	}
@@ -109,7 +112,7 @@ func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
 		"evaluations": evaluations,
 		"stats":       stats,
 	}
-
+	fmt.Println("respons", response["stats"])
 	respond(w, r, http.StatusAccepted, response)
 
 }

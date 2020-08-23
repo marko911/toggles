@@ -20,6 +20,7 @@ const messageSubject string = "evaluations"
 // EvaluationHandler computes the variation shown to user for given flag
 func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	read := read.FromContext(r.Context())
+
 	// get tenant user for request
 	tenant := auth.TenantFromContext(r.Context())
 	if tenant == nil {

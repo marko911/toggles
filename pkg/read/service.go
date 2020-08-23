@@ -24,13 +24,11 @@ type Repository interface {
 	GetFlags(models.Tenant) ([]models.Flag, error)
 	GetFlag(key string) (*models.Flag, error)
 	GetFlagStats(id bson.ObjectId) (*models.FlagStats, error)
-
 	GetSegments(models.Tenant) ([]models.Segment, error)
 	GetUsers(models.Tenant) ([]models.User, error)
 	GetTenant(key string) *models.Tenant
 	GetEvals() ([]models.Evaluation, error)
 	GetFlagEvals(bson.ObjectId, int, int) ([]models.Evaluation, int, error)
-
 	GetTenantFromAPIKey(apiKey string) *models.Tenant
 }
 

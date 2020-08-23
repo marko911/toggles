@@ -249,8 +249,6 @@ func (s *Store) GetEvals() ([]models.Evaluation, error) {
 	return evals, err
 }
 
-// const pageSize = 10
-
 // GetFlagEvals gets all evals for single flag
 func (s *Store) GetFlagEvals(id bson.ObjectId, page int, pageSize int) ([]models.Evaluation, int, error) {
 	sess := s.Copy()
@@ -282,7 +280,20 @@ func (s *Store) GetFlagStats(id bson.ObjectId) (*models.FlagStats, error) {
 		}},
 	})
 	err := pipe.Iter().All(&stats.Counts)
-	fmt.Println("stats coutns", stats.Counts)
+	fmt.Println("preee", stats.Counts)
+
+	if len(stats.Counts) == 0 {
+		pipe = d.C("flags").Pipe([]bson.M{
+			{"$match": bson.M{"_id": id}},
+			{"$unwind": "$variations"},
+			{"$project": bson.M{
+
+				"_id":   bson.M{"variation": "$variations.name"},
+				"count": "0",
+			}},
+		})
+		err = pipe.Iter().All(&stats.Counts)
+	}
 	if err != nil {
 		return nil, err
 	}
