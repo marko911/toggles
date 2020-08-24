@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
@@ -112,7 +111,6 @@ func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
 		"evaluations": evaluations,
 		"stats":       stats,
 	}
-	fmt.Println("respons", response["stats"])
 	respond(w, r, http.StatusAccepted, response)
 
 }
@@ -122,7 +120,6 @@ func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
 
 	s := read.FromContext(r.Context())
 	tenant := auth.TenantFromContext(r.Context())
-	fmt.Println("tenanttttt", tenant)
 	c, err := s.GetFlags(*tenant)
 	if err != nil {
 		logrus.Error("Getting flags failed: ", err)

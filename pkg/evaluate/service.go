@@ -52,7 +52,7 @@ func (s *service) Evaluate(e EvaluationRequest, flag *models.Flag) (*models.Eval
 		return &models.Evaluation{Variation: v, Flag: *flag}, nil
 	}
 
-	if v, err := e.MatchDefaultVariations(flag); v != nil {
+	if v, err := e.MatchDefaultVariations(*flag); v != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (s *service) Evaluate(e EvaluationRequest, flag *models.Flag) (*models.Eval
 // MatchDefault matches default variation, copying from above until later
 func (s *service) MatchDefault(e EvaluationRequest, flag *models.Flag) (*models.Evaluation, error) {
 
-	if v, err := e.MatchDefaultVariations(flag); v != nil {
+	if v, err := e.MatchDefaultVariations(*flag); v != nil {
 		if err != nil {
 			return nil, err
 		}

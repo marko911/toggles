@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"fmt"
 	"toggle/server/pkg/models"
 
 	"github.com/sirupsen/logrus"
@@ -44,7 +43,6 @@ func (s *Store) UpdateSegment(seg *models.Segment) error {
 	d := sess.DB(s.DBName)
 	err := d.C("segments").Update(bson.M{"_id": seg.ID}, seg)
 	if err != nil {
-		fmt.Println("-------------", seg.Tenant)
 		logrus.Error(err)
 		return err
 	}
@@ -72,7 +70,6 @@ func (s *Store) InsertEvaluation(e *models.Evaluation) error {
 	sess := s.Copy()
 	defer sess.Close()
 	d := sess.DB(s.DBName)
-	fmt.Println("Inserting")
 	err := d.C("evaluations").Insert(e)
 	// err := d.C("evaluations").Update(bson.M{"flag.key": e.Flag.Key}, bson.M{"$inc": bson.M{"count": 1}})
 	if err != nil {
@@ -87,12 +84,11 @@ func (s *Store) InsertUser(u *models.User) error {
 	sess := s.Copy()
 	defer sess.Close()
 	d := sess.DB(s.DBName)
-	info, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
+	_, err := d.C("users").Upsert(bson.M{"key": u.Key}, u)
 	if err != nil {
 		insertErr := d.C("users").Insert(u)
 		return insertErr
 	}
-	logrus.Println("info", info.UpsertedId)
 	return nil
 }
 
@@ -121,7 +117,6 @@ func (s *Store) InsertAttributes(a []models.Attribute) error {
 		_, err := d.C("attributes").Upsert(bson.M{"name": attr.Name}, attr)
 		if err != nil {
 			newErr := d.C("attributes").Insert(&attr)
-			fmt.Println("NEW WERRRR", newErr)
 			return newErr
 		}
 	}
@@ -210,7 +205,6 @@ func (s *Store) GetTenant(key string) *models.Tenant {
 func (s *Store) GetTenantFromAPIKey(apiKey string) *models.Tenant {
 	sess := s.Copy()
 	defer sess.Close()
-	fmt.Println("api _________________keyyyyyyy", apiKey)
 
 	d := sess.DB(s.DBName)
 	var t models.Tenant
@@ -280,7 +274,6 @@ func (s *Store) GetFlagStats(id bson.ObjectId) (*models.FlagStats, error) {
 		}},
 	})
 	err := pipe.Iter().All(&stats.Counts)
-	fmt.Println("preee", stats.Counts)
 
 	if len(stats.Counts) == 0 {
 		pipe = d.C("flags").Pipe([]bson.M{

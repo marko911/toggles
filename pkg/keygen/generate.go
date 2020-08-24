@@ -26,7 +26,6 @@ func GenerateToken(email string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Hash to store:", string(hash))
 
 	return base64.StdEncoding.EncodeToString(hash)
 }

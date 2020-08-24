@@ -74,6 +74,5 @@ func (r *Rule) toExprStr() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not supported operator: %s", r.Operator)
 	}
-
 	return fmt.Sprintf("({%s} %s %s)", r.Attribute, o, r.Value), nil
 }

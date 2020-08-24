@@ -26,3 +26,11 @@ func (m *mockCreate) InsertTenant(t *models.Tenant) error {
 func (m *mockCreate) InsertEvaluation(e *models.Evaluation) error {
 	return nil
 }
+
+func (m *mockCreate) UpdateFlag(f *models.Flag) error {
+	return nil
+}
+
+func (m *mockCreate) UpdateSegment(s *models.Segment) error {
+	return nil
+}

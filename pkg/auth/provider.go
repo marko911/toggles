@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -53,7 +52,8 @@ type userInfo struct {
 func TennantMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	token, err := jwtmiddleware.FromAuthHeader(r)
 	if err != nil {
-		fmt.Println("NO TOKEN zzzzzzzzzzzzzzzzz")
+		logrus.Error(err.Error())
+
 	}
 	c := GetCache()
 	tenantID := c.GetByAuthToken(token)
@@ -73,7 +73,6 @@ func TennantMiddleware(w http.ResponseWriter, r *http.Request, next http.Handler
 			if err != nil {
 				logrus.Error(err.Error())
 			}
-			fmt.Println("addding to ctx -------------", t)
 		}
 		// add tenant token to id in cache
 		c.tenants[token] = t.ID

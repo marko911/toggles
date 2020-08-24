@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
@@ -50,11 +51,14 @@ func main() {
 		},
 	}
 	u, _ := url.Parse("http://localhost:8080/evals/flags/JDJhJDEwJGZneG8xYzdNUmdhZUdOMUdCY3AvWnU0RlhnbEFRQWdSVmRrZGk4bzNmQTdWU2MzQ0RlbFl1")
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 2000; i++ {
 		body := map[string]interface{}{
-			"flagKey": "fetch-flags-was",
+			"flagKey": "triple",
 			"user": map[string]interface{}{
-				"key": genString(8),
+				"key": fmt.Sprintf("%v@gmail.com", genString(8)),
+				"attributes": map[string]interface{}{
+					"groups": []string{"beta testers"},
+				},
 			}}
 		mars, _ := json.Marshal(body)
 		req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(mars))

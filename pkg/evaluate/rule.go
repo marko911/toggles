@@ -36,7 +36,6 @@ func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variatio
 
 		// build expression of target
 		expr, err := target.ToExpr()
-
 		if err != nil {
 			logrus.Error("Error getting expression from target ", err)
 			return nil, err
@@ -86,7 +85,7 @@ func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variatio
 }
 
 // MatchDefaultVariations returns the default variation for this user
-func (e *EvaluationRequest) MatchDefaultVariations(f *models.Flag) (*models.Variation, error) {
+func (e *EvaluationRequest) MatchDefaultVariations(f models.Flag) (*models.Variation, error) {
 	var u user
 	err := mapstructure.Decode(e.User, &u)
 	if err != nil {

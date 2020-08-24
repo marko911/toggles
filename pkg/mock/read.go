@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"toggle/server/pkg/models"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 type mockRead struct {
 	flagsJSON       []byte
 	tenantJSON      []byte
+	flagStatsJSON   []byte
 	singleFlagJSON  []byte
 	evaluationsJSON []byte
 	segsPath        *string
@@ -71,4 +74,16 @@ func (m mockRead) GetEvals() ([]models.Evaluation, error) {
 	var e []models.Evaluation
 	json.Unmarshal(m.evaluationsJSON, &e)
 	return e, nil
+}
+
+func (m mockRead) GetFlagEvals(bson.ObjectId, int, int) ([]models.Evaluation, int, error) {
+	var e []models.Evaluation
+	json.Unmarshal(m.evaluationsJSON, &e)
+	return e, 100, nil
+}
+
+func (m mockRead) GetFlagStats(id bson.ObjectId) (*models.FlagStats, error) {
+	var s models.FlagStats
+	json.Unmarshal(m.flagStatsJSON, &s)
+	return &s, nil
 }

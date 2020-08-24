@@ -171,7 +171,9 @@ func TestEvaluationRequest_MatchFlagTarget(t *testing.T) {
 				t.Errorf("EvaluationRequest.MatchFlagTarget() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			diff := cmp.Diff(tt.want, got)
+
 			if diff != "" {
 				t.Fatalf(diff)
 			}

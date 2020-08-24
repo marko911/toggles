@@ -80,7 +80,7 @@ func Test_service_Evaluate(t *testing.T) {
 		{
 			"flag with user targeting",
 			fields{r: &mock.EvaluateByte{Flag: userTarget}},
-			args{EvaluationRequest{user{Key: "jenny@hey.com"}}},
+			args{EvaluationRequest{user{Key: "jenny@hey.com"}, "hey-ladies"}},
 			&models.Evaluation{
 				Variation: &models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
 				Flag: models.Flag{
@@ -106,7 +106,7 @@ func Test_service_Evaluate(t *testing.T) {
 				"attributes": map[string]interface{}{
 					"groups": []string{"ladies"},
 				},
-			}}},
+			}, "alpha-users"}},
 			&models.Evaluation{
 				Variation: &models.Variation{Name: "Red", Percent: 100},
 				Flag: models.Flag{
@@ -255,7 +255,7 @@ func TestMatchingDistributions(t *testing.T) {
 					"attributes": tt.attributes,
 				}
 
-				e := EvaluationRequest{u}
+				e := EvaluationRequest{u, "asd"}
 				flag, err := s.r.GetFlag("asd")
 				got, err := s.Evaluate(e, flag)
 

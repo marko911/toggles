@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -69,7 +68,6 @@ func main() {
 			},
 		},
 	}
-	fmt.Println("os args", os.Args)
 
 	err := app.Run(os.Args)
 	if err != nil {

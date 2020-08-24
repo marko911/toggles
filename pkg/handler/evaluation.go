@@ -95,7 +95,7 @@ func EvaluationHandler(w http.ResponseWriter, r *http.Request) {
 	cache := auth.CacheFromContext(r.Context())
 	var matchedVariation *models.Evaluation
 
-	if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit {
+	if flag.HasLimit() && cache.GetEvalCount(flag.ID) > flag.Limit || flag.Enabled == false {
 		matchedVariation, err = s.MatchDefault(*eval, flag)
 		if err != nil {
 			logrus.Error(err)

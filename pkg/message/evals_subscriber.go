@@ -1,7 +1,6 @@
 package message
 
 import (
-	"fmt"
 	"time"
 	"toggle/server/pkg/create"
 	"toggle/server/pkg/models"
@@ -12,7 +11,6 @@ import (
 func StartEvalEventsReceiever(c create.Service, m Service) {
 	go func() {
 		m.Subscribe("evaluations", func(e *models.Evaluation) {
-			fmt.Printf("---------------------Received a eval: %+v\n", e)
 			e.CreatedAt = time.Now()
 			c.CreateEvaluation(e)
 			flag := e.Flag
