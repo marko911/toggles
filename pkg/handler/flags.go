@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"toggle/server/pkg/auth"
 	"toggle/server/pkg/create"
@@ -66,7 +67,7 @@ func HandleFlagPut(w http.ResponseWriter, r *http.Request) {
 		RespondErr(w, r, http.StatusBadRequest, err)
 		return
 	}
-
+	fmt.Println("flag", flag.Targets)
 	if err := s.UpdateFlag(flag); err != nil {
 		RespondErr(w, r, http.StatusBadRequest, e.ErrFailedCreateFlag, err)
 		return

@@ -33,7 +33,7 @@ type Segment struct {
 	Key    string        `json:"key" bson:"key"`
 	Rules  []Rule        `json:"rules,omitempty" bson:"rules,omitempty"`
 	Users  []string      `json:"users,omitempty" bson:"users,omitempty"` // user keys
-	Tenant bson.ObjectId `json:"tenant" bson:"tenant"`
+	Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant,omitempty"`
 }
 
 //Variation represents a toggle option for a flag
