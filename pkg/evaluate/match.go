@@ -11,13 +11,8 @@ import (
 	"github.com/zhouzhuojie/conditions"
 )
 
-type user struct {
+type userKey struct {
 	Key string `json:"key"`
-}
-
-type userAttr struct {
-	Key        string
-	Attributes map[string]interface{}
 }
 
 const percentMultiplier float64 = 100
@@ -33,28 +28,36 @@ func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variatio
 			return nil, fmt.Errorf("Cannot read evaluation request properly %v", m)
 		}
 		attrs := m["attributes"].(map[string]interface{})
+		var match bool
 
-		// build expression of target
-		expr, err := target.ToExpr()
+		var u userKey
+		err := mapstructure.Decode(e.User, &u)
 		if err != nil {
-			logrus.Error("Error getting expression from target ", err)
-			return nil, err
+			return nil, errors.New("Failed decoding user from evaluation request object")
 		}
-		// pass request data into expression evaluator
-		match, err := conditions.Evaluate(expr, attrs)
 
-		if err != nil {
-			return nil, err
+		// Check segment target
+		if target.IsSegment() {
+			match, err = target.SegmentMatch(attrs, u.Key)
+			// rest
+		} else {
+			// build expression of target
+			expr, err := target.ToExpr()
+			if err != nil {
+				logrus.Error("Error getting expression from target ", err)
+				return nil, err
+			}
+			// pass request data into expression evaluator
+			match, err = conditions.Evaluate(expr, attrs)
+
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if match {
 
 			if target.HasRolloutDistribution() {
-				var u user
-				err := mapstructure.Decode(e.User, &u)
-				if err != nil {
-					return nil, errors.New("Failed decoding user from evaluation request object")
-				}
 
 				fraction := CohortFraction(fmt.Sprintf("%s-%s", u.Key, flag.Key))
 				percents := Percents(target.Variations)
@@ -86,7 +89,7 @@ func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variatio
 
 // MatchDefaultVariations returns the default variation for this user
 func (e *EvaluationRequest) MatchDefaultVariations(f models.Flag) (*models.Variation, error) {
-	var u user
+	var u userKey
 	err := mapstructure.Decode(e.User, &u)
 	if err != nil {
 		return nil, errors.New("Failed decoding user from evaluation request object")

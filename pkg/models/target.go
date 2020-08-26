@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/zhouzhuojie/conditions"
 )
 
 // Target is a specific user constraint
 type Target struct {
-	Rules      []Rule      `json:"rules" bson:"rules"`                     // slice used to allow for multiple rules to be used as an AND condition
-	Users      []string    `json:"users,omitempty" bson:"users,omitempty"` // user keys
-	Variations []Variation `json:"variations" bson:"variations"`           // distribution of variations if all rules pass
+	Rules []Rule `json:"rules" bson:"rules"` // slice used to allow for multiple rules to be used as an AND condition
+	// Users      []string    `json:"users,omitempty" bson:"users,omitempty"` // user keys
+	Variations []Variation `json:"variations" bson:"variations"` // distribution of variations if all rules pass
 	Segment
 }
 
@@ -54,4 +55,38 @@ func (t Target) GetMatchingVariation() *Variation {
 	}
 
 	return nil
+}
+
+// IsSegment checks if target is defined with a segment
+func (t Target) IsSegment() bool {
+	return t.Segment.ID != ""
+}
+
+// SegmentMatch tells weather user fits segment or not
+func (t Target) SegmentMatch(attrs map[string]interface{}, userKey string) (bool, error) {
+	//first check if user is in segment users list
+	_, found := Find(t.Segment.Users, userKey)
+	if found {
+		return true, nil
+	}
+
+	//now parse through segment rules
+	expr, err := t.Segment.ToExpr()
+	if err != nil {
+		logrus.Error("Error getting expression from target ", err)
+		return false, err
+	}
+
+	return conditions.Evaluate(expr, attrs)
+
+}
+
+// Find looks for a string in a slice and returns its index and weather it was successful
+func Find(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
 }
