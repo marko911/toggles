@@ -28,9 +28,9 @@ type Rule struct {
 
 // Segment represents a specific group of users
 type Segment struct {
-	ID     bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	Name   string        `json:"name" bson:"name"`
-	Key    string        `json:"key" bson:"key"`
+	ID     bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Name   string        `json:"name,omitempty" bson:"name,omitempty"`
+	Key    string        `json:"key,omitempty" bson:"key,omitempty"`
 	Rules  []Rule        `json:"rules,omitempty" bson:"rules,omitempty"`
 	Users  []string      `json:"users,omitempty" bson:"users,omitempty"` // user keys
 	Tenant bson.ObjectId `json:"tenant,omitempty" bson:"tenant,omitempty"`

@@ -12,6 +12,7 @@ type Target struct {
 	Rules      []Rule      `json:"rules" bson:"rules"`                     // slice used to allow for multiple rules to be used as an AND condition
 	Users      []string    `json:"users,omitempty" bson:"users,omitempty"` // user keys
 	Variations []Variation `json:"variations" bson:"variations"`           // distribution of variations if all rules pass
+	Segment
 }
 
 // ToExpr maps ConstraintArray to expr by joining 'AND'

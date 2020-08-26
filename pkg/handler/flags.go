@@ -118,7 +118,7 @@ func HandleFlagGet(w http.ResponseWriter, r *http.Request) {
 
 // HandleFlagsGet returns all flags from db
 func HandleFlagsGet(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("--------------------------")
 	s := read.FromContext(r.Context())
 	tenant := auth.TenantFromContext(r.Context())
 	c, err := s.GetFlags(*tenant)

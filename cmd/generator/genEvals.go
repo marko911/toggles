@@ -50,10 +50,10 @@ func main() {
 			},
 		},
 	}
-	u, _ := url.Parse("http://localhost:8080/evals/flags/JDJhJDEwJGZneG8xYzdNUmdhZUdOMUdCY3AvWnU0RlhnbEFRQWdSVmRrZGk4bzNmQTdWU2MzQ0RlbFl1")
-	for i := 0; i < 2000; i++ {
+	u, _ := url.Parse("http://localhost:8080/evals/flags/JDJhJDEwJDF0QkFYcGZYUC9OSHh1bFgybkNuT09wOXl0aWRZNzhsSXdpaUtVdFdyeFEuRmV2cFFPa3JX")
+	for i := 0; i < 10; i++ {
 		body := map[string]interface{}{
-			"flagKey": "triple",
+			"flagKey": "on-off-bool",
 			"user": map[string]interface{}{
 				"key": fmt.Sprintf("%v@gmail.com", genString(8)),
 				"attributes": map[string]interface{}{
