@@ -8,7 +8,6 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
-	"github.com/zhouzhuojie/conditions"
 )
 
 type userKey struct {
@@ -28,34 +27,37 @@ func (e *EvaluationRequest) MatchFlagTarget(flag *models.Flag) (*models.Variatio
 			return nil, fmt.Errorf("Cannot read evaluation request properly %v", m)
 		}
 		attrs := m["attributes"].(map[string]interface{})
-		var match bool
-
 		var u userKey
 		err := mapstructure.Decode(e.User, &u)
 		if err != nil {
 			return nil, errors.New("Failed decoding user from evaluation request object")
 		}
 
-		// Check segment target
-		if target.IsSegment() {
-			match, err = target.SegmentMatch(attrs, u.Key)
-			// rest
-		} else {
-			// build expression of target
-			expr, err := target.ToExpr()
-			if err != nil {
-				logrus.Error("Error getting expression from target ", err)
-				return nil, err
-			}
-			// pass request data into expression evaluator
-			match, err = conditions.Evaluate(expr, attrs)
+		var userMatches = true
 
+		// SegmentMatch will return true if there is no segment
+		if target.HasSegment() {
+			fmt.Println("HAS SEGM")
+			segMatch, err := target.SegmentMatch(attrs, u.Key)
 			if err != nil {
+				fmt.Println("Errrrrrrrrrr", err)
 				return nil, err
 			}
+			userMatches = userMatches && segMatch
 		}
 
-		if match {
+		if target.HasRules() {
+			fmt.Println("HAS RULES")
+			// pass request data into expression evaluator
+			rulesMatch, err := target.RulesMatch(attrs)
+			if err != nil {
+				logrus.Error("Error getting expression from target ", err)
+			}
+			fmt.Println("RULES MATCH", rulesMatch)
+			userMatches = userMatches && rulesMatch
+		}
+		fmt.Println("USER MATCHES", userMatches)
+		if userMatches {
 
 			if target.HasRolloutDistribution() {
 

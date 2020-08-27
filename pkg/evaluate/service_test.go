@@ -80,7 +80,7 @@ func Test_service_Evaluate(t *testing.T) {
 		{
 			"flag with user targeting",
 			fields{r: &mock.EvaluateByte{Flag: userTarget}},
-			args{EvaluationRequest{user{Key: "jenny@hey.com"}, "hey-ladies"}},
+			args{EvaluationRequest{userKey{Key: "jenny@hey.com"}, "hey-ladies"}},
 			&models.Evaluation{
 				Variation: &models.Variation{Name: "On", Percent: 100, UserKeys: []string{"jenny@hey.com", "mary@hey.com"}},
 				Flag: models.Flag{

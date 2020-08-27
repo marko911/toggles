@@ -60,6 +60,10 @@ func (mc MockCollection) RemoveAll(selector interface{}) (info *mgo.ChangeInfo, 
 	return nil, nil
 }
 
+func (mc MockCollection) UpdateAll(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error) {
+	return nil, nil
+}
+
 // C mocks mgo.Database(name).Collection(name).
 func (db MockDatabase) C(name string) Collection {
 	return MockCollection{}

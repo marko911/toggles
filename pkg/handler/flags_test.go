@@ -26,7 +26,7 @@ func TestHandleFlagsGet(t *testing.T) {
 	ctx := mock.CreateContext(t,
 		func(c context.Context) context.Context {
 
-			tempTenant := models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
+			tempTenant := &models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
 			return context.WithValue(c, auth.TenantKey, tempTenant)
 		},
 	)
@@ -99,16 +99,15 @@ func TestHandleFlagsPost(t *testing.T) {
 		Body     io.Reader
 		Expected string
 	}{
-		"empty payload":           {Body: strings.NewReader(""), Expected: errors.ErrJSONPayloadEmpty.Error()},
-		"bad payload format":      {Body: bytes.NewBuffer(postBadPayloadFormat), Expected: errors.ErrJSONPayloadInvalidFlag.Error()},
-		"bad payload: variations": {Body: bytes.NewBuffer(postBadPayloadVariations), Expected: errors.ErrJSONPayloadInvalidFlag.Error()},
-		"good payload":            {bytes.NewBuffer([]byte(postGoodPayload)), errors.SuccessFlagCreated},
+		"bad payload format":      {Body: bytes.NewBuffer(postBadPayloadFormat), Expected: errors.ErrJSONPayloadInvalidFlagKey.Error()},
+		"bad payload: variations": {Body: bytes.NewBuffer(postBadPayloadVariations), Expected: errors.ErrJSONPayloadInvalidVariationEmpty.Error()},
+		"good payload":            {bytes.NewBuffer(postGoodPayload), SuccessFlagCreated},
 	}
 
 	ctx := mock.CreateContext(t,
+		// AUTH context injection
 		func(c context.Context) context.Context {
-
-			tempTenant := models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
+			tempTenant := &models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}
 			return context.WithValue(c, auth.TenantKey, tempTenant)
 		},
 	)

@@ -13,13 +13,17 @@ type Target struct {
 	Rules []Rule `json:"rules" bson:"rules"` // slice used to allow for multiple rules to be used as an AND condition
 	// Users      []string    `json:"users,omitempty" bson:"users,omitempty"` // user keys
 	Variations []Variation `json:"variations" bson:"variations"` // distribution of variations if all rules pass
-	Segment
+	Segment    `json:"segment,omitempty" bson:"segment,omitempty"`
 }
 
 // ToExpr maps ConstraintArray to expr by joining 'AND'
 func (t Target) ToExpr() (conditions.Expr, error) {
 	strs := make([]string, 0, len(t.Rules))
 	for _, c := range t.Rules {
+		//TODO: fix this hacky way of segmeents in rules
+		if c.Attribute == "segment" {
+			continue
+		}
 		s, err := c.toExprStr()
 		if err != nil {
 			return nil, err
@@ -57,13 +61,27 @@ func (t Target) GetMatchingVariation() *Variation {
 	return nil
 }
 
-// IsSegment checks if target is defined with a segment
-func (t Target) IsSegment() bool {
+// HasSegment checks if target is defined with a segment
+func (t Target) HasSegment() bool {
 	return t.Segment.ID != ""
 }
 
-// SegmentMatch tells weather user fits segment or not
+// HasRules checks if target is defined with rules
+func (t Target) HasRules() bool {
+	var rules []Rule
+	for _, r := range t.Rules {
+		if r.Attribute != "segment" {
+			rules = append(rules, r)
+		}
+	}
+	return len(rules) > 0
+}
+
+// SegmentMatch tells whether user fits segment or not
 func (t Target) SegmentMatch(attrs map[string]interface{}, userKey string) (bool, error) {
+	if t.Segment.ID == "" {
+		return true, nil
+	}
 	//first check if user is in segment users list
 	_, found := Find(t.Segment.Users, userKey)
 	if found {
@@ -77,6 +95,18 @@ func (t Target) SegmentMatch(attrs map[string]interface{}, userKey string) (bool
 		return false, err
 	}
 
+	return conditions.Evaluate(expr, attrs)
+
+}
+
+//RulesMatch tells us whether rules matched user
+func (t Target) RulesMatch(attrs map[string]interface{}) (bool, error) {
+	expr, err := t.ToExpr()
+	if err != nil {
+		logrus.Error("Error getting expression from target ", err)
+		return false, err
+	}
+	// pass request data into expression evaluator
 	return conditions.Evaluate(expr, attrs)
 
 }

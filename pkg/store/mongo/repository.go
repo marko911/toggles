@@ -46,6 +46,14 @@ func (s *Store) UpdateSegment(seg *models.Segment) error {
 		logrus.Error(err)
 		return err
 	}
+	_, err = d.C("flags").UpdateAll(bson.M{"targets.segment._id": seg.ID}, bson.M{"$set": bson.M{
+		"targets.$.segment": seg,
+	}})
+
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
 	return nil
 }
 

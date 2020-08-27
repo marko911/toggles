@@ -141,6 +141,7 @@ var SuccessFlagUpdated = "Flag updated successfully"
 func HandleFlagsPost(w http.ResponseWriter, r *http.Request) {
 	s := create.FromContext(r.Context())
 	tenant := auth.TenantFromContext(r.Context())
+
 	flag := &models.Flag{Tenant: tenant.ID}
 	if err := decodeBody(r, flag); err != nil {
 		RespondErr(w, r, http.StatusBadRequest, err)
