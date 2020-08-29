@@ -33,7 +33,7 @@ func (r *Router) Handler(ctx *cli.Context) http.Handler {
 	router := mux.NewRouter()
 	tenantRoutes := mux.NewRouter().PathPrefix("/api").Subrouter()
 	evalRoutes := mux.NewRouter().PathPrefix("/evals").Subrouter()
-
+	evalRoutes = evalRoutes.StrictSlash(true)
 	tenantRoutes.HandleFunc("/flags/{id}", FlagHandler)
 	tenantRoutes.HandleFunc("/flags", FlagsHandler)
 	tenantRoutes.HandleFunc("/segments", SegmentsHandler)
