@@ -9,8 +9,8 @@ import (
 
 // EvaluationRequest wraps User into interface for passing to evaluation library
 type EvaluationRequest struct {
-	User    interface{}
-	FlagKey string `json:"flagKey"`
+	User interface{}
+	// FlagKey string `json:"flagKey"`
 }
 
 // Service runs evaluation operations on client feature flag requests
