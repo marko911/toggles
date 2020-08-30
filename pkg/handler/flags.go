@@ -11,9 +11,9 @@ import (
 	"toggle/server/pkg/read"
 
 	"github.com/gemcook/pagination-go"
+	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // FlagsResponse is the json payload for frontend

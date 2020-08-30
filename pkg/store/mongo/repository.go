@@ -3,8 +3,8 @@ package mongo
 import (
 	"toggle/server/pkg/models"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // InsertFlag saves a flag to mongo

@@ -3,7 +3,7 @@ package mongo
 import (
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
+	mgo "github.com/globalsign/mgo"
 )
 
 // WrapCollection wraps a mgo.Collection to embed methods in models.

@@ -8,8 +8,8 @@ import (
 
 	"github.com/cheekybits/is"
 	"github.com/dchest/uniuri"
+	"github.com/globalsign/mgo/bson"
 	"github.com/google/go-cmp/cmp"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type fields struct {

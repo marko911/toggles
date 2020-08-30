@@ -5,8 +5,8 @@ import (
 	"time"
 	"toggle/server/pkg/read"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var singletonCacheOnce sync.Once

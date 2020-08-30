@@ -10,10 +10,10 @@ import (
 	"toggle/server/pkg/models"
 	"toggle/server/pkg/read"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/negroni"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var tempTenant models.Tenant = models.Tenant{ID: bson.ObjectIdHex("5ef5f06a4fc7eb0006772c49")}

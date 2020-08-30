@@ -15,7 +15,7 @@ import (
 	"toggle/server/pkg/models"
 
 	"github.com/cheekybits/is"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 const checkMark = "\u2713"

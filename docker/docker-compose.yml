@@ -4,6 +4,7 @@ services:
     container_name: toggle-server
     build:
       context: ./toggle-server
+      dockerfile: Dockerfile-dev
       args:
         env: ${ENV}
     volumes:
@@ -24,8 +25,8 @@ services:
     networks:
       - nats
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: l30m355i
+      MONGO_USER: root
+      MONGO_PASS: l30m355i
 
   mongo-express:
     image: mongo-express
@@ -52,8 +53,3 @@ services:
 networks:
   nats:
     name: nats
-  # sc-redis:
-  #   container_name: sc-redis
-  #   image: redis
-  #   ports:
-  #     - "6379:6379"

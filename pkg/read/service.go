@@ -3,7 +3,7 @@ package read
 import (
 	"toggle/server/pkg/models"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 // Service provides read operations

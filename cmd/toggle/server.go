@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -55,6 +56,7 @@ func NewServer(c *cli.Context) *Server {
 
 	if err != nil {
 		logrus.Fatal(err)
+		fmt.Println("ERROR STARTING MONGO")
 		return nil
 	}
 

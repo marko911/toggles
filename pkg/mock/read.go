@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"toggle/server/pkg/models"
 
-	"gopkg.in/mgo.v2/bson"
+	" github.com/globalsign/mgo/bson"
 )
 
 type mockRead struct {

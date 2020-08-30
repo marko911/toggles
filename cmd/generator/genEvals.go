@@ -1,14 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
-	"net"
-	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -32,46 +26,46 @@ func genString(length int) string {
 
 // Used to generate evaluations on a flag
 func main() {
-	var conn net.Conn
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			Dial: func(netw, addr string) (net.Conn, error) {
-				if conn != nil {
-					conn.Close()
-					conn = nil
-				}
-				netc, err := net.DialTimeout(netw, addr, 1*time.Second)
-				if err != nil {
-					return nil, err
-				}
-				conn = netc
-				return netc, nil
-			},
-		},
-	}
-	u, _ := url.Parse("http://localhost:8080/evals/flags/JDJhJDEwJDF0QkFYcGZYUC9OSHh1bFgybkNuT09wOXl0aWRZNzhsSXdpaUtVdFdyeFEuRmV2cFFPa3JX")
-	for i := 0; i < 10; i++ {
-		body := map[string]interface{}{
-			"flagKey": "on-off-bool",
-			"user": map[string]interface{}{
-				"key": fmt.Sprintf("%v@gmail.com", genString(8)),
-				"attributes": map[string]interface{}{
-					"groups": []string{"beta testers"},
-				},
-			}}
-		mars, _ := json.Marshal(body)
-		req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(mars))
-		if err != nil {
-			log.Println("creating post request failed:", err)
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Println("Error getting response:", err)
-			continue
-		}
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-			log.Println("didnt work", resp.StatusCode)
-		}
-	}
+	// var conn net.Conn
+	fmt.Println("GEN EVALS STARTED")
+	// client := &http.Client{
+	// 	Transport: &http.Transport{
+	// 		Dial: func(netw, addr string) (net.Conn, error) {
+	// 			if conn != nil {
+	// 				conn.Close()
+	// 				conn = nil
+	// 			}
+	// 			netc, err := net.DialTimeout(netw, addr, 1*time.Second)
+	// 			if err != nil {
+	// 				return nil, err
+	// 			}
+	// 			conn = netc
+	// 			return netc, nil
+	// 		},
+	// 	},
+	// }
+	// u, _ := url.Parse("http://localhost:8080/evals/flags/JDJhJDEwJDF0QkFYcGZYUC9OSHh1bFgybkNuT09wOXl0aWRZNzhsSXdpaUtVdFdyeFEuRmV2cFFPa3JX")
+	// for i := 0; i < 10; i++ {
+	// 	body := map[string]interface{}{
+	// 		"flagKey": "on-off-bool",
+	// 		"user": map[string]interface{}{
+	// 			"key": fmt.Sprintf("%v@gmail.com", genString(8)),
+	// 			"attributes": map[string]interface{}{
+	// 				"groups": []string{"beta testers"},
+	// 			},
+	// 		}}
+	// 	mars, _ := json.Marshal(body)
+	// 	req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(mars))
+	// 	if err != nil {
+	// 		log.Println("creating post request failed:", err)
+	// 	}
+	// 	resp, err := client.Do(req)
+	// 	if err != nil {
+	// 		log.Println("Error getting response:", err)
+	// 		continue
+	// 	}
+	// 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+	// 		log.Println("didnt work", resp.StatusCode)
+	// 	}
+	// }
 }
