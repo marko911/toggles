@@ -24,5 +24,5 @@ help:
 	| column -t  -s ' '
 
 run: ## Spin up dev env via docker containers
-		docker-compose -f ./docker/docker-compose.yml up --build
+		docker-compose -f ./docker/docker-compose-dev.yml up --build
 
