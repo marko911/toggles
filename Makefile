@@ -2,7 +2,7 @@
 .PHONY: help
 
 project?=featflags-369-superseed
-tag?=gcr.io/$(project)/flags-server:latest
+tag?=gcr.io/$(project)/flags-server:dev
 args?=
 
 test:

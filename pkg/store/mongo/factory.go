@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	mgo "github.com/globalsign/mgo"
@@ -12,37 +13,50 @@ import (
 
 // NewMongoStore returns a new Mongo Session.
 func NewMongoStore(c *cli.Context) (*Store, error) {
-	var dialInfo *mgo.DialInfo
-	if c.String("database-address") == "mongo" {
-		dialInfo = &mgo.DialInfo{
+	var sess *mgo.Session
+	if os.Getenv("ENV") != "prod" {
+		dialInfo := &mgo.DialInfo{
 			Addrs: []string{
 				"mongo",
 			},
 			Username: c.String("mongo-username"),
 			Password: c.String("mongo-password"),
 		}
+		mgoSession, err := mgo.DialWithInfo(dialInfo)
+		if err != nil {
+			logrus.Fatal("error dialing local mongo")
+		}
+		sess = mgoSession
+
 	} else {
+		logrus.Println("ENV=PROD")
 		url := fmt.Sprintf("mongodb://%v:%v@%v/%v?ssl=true&replicaSet=atlas-672hbg-shard-0&authSource=admin", c.String("mongo-username"), c.String("mongo-password"), c.String("database-address"), c.String("database-name"))
+		// url := "mongodb://backend_api_user:l30m355i@cluster0-shard-00-00.ptlpo.gcp.mongodb.net:27017,cluster0-shard-00-01.ptlpo.gcp.mongodb.net:27017,cluster0-shard-00-02.ptlpo.gcp.mongodb.net:27017/toggles?ssl=true&replicaSet=atlas-672hbg-shard-0&authSource=admin"
 		d, err := mgo.ParseURL(url)
 		if err != nil {
-			logrus.Fatal("error parsing mongo url")
+			logrus.Fatal("error parsing mongo url", err)
 		}
-		dialInfo = d
+		mgoSession, err := mgo.DialWithInfo(d)
+		if err != nil {
+			logrus.Fatal("error dialing mongo ", err)
+		}
+		sess = mgoSession
 	}
 	// url := "mongodb://backend_api_user:l30m355i@cluster0-shard-00-00.ptlpo.gcp.mongodb.net:27017,cluster0-shard-00-01.ptlpo.gcp.mongodb.net:27017,cluster0-shard-00-02.ptlpo.gcp.mongodb.net:27017/toggles?ssl=true&replicaSet=atlas-672hbg-shard-0&authSource=admin"
+	// dialInfo.Timeout = 3000
 
-	mgoSession, err := mgo.DialWithInfo(dialInfo)
-	fmt.Println("finished dialing")
-	if err != nil {
-		fmt.Println("mongo dial asderror", err)
-		return nil, err
-	}
-	fmt.Println("startin mongo session")
-	session := Store{mgoSession, c.String("database-name")}
+	// mgoSession, err := mgo.DialWithInfo(dialInfo)
+	// logrus.Println("finished dialing")
+	// if err != nil {
+	// 	logrus.Println("mongo dial asderror", err)
+	// 	return nil, err
+	// }
+	logrus.Println("started mongo session")
+	session := Store{sess, c.String("database-name")}
 	session.SetSafe(&mgo.Safe{})
 	session.SetSyncTimeout(3 * time.Second)
 	session.SetSocketTimeout(3 * time.Second)
-	fmt.Println("rturning mongo session")
+	logrus.Println("rturning mongo session")
 	return &session, nil
 
 }
