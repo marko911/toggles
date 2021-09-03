@@ -18,7 +18,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mitchellh/mapstructure v1.3.2
-	github.com/nats-io/nats-server/v2 v2.1.7 // indirect
+	github.com/nats-io/nats-server/v2 v2.2.0
 	github.com/nats-io/nats.go v1.10.0
 	github.com/prometheus/common v0.10.0
 	github.com/sirupsen/logrus v1.4.2
